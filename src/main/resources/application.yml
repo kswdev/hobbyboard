@@ -1,1 +1,3 @@
-spring.application.name=hobbyboard
+spring:
+  profiles.active: local
+  application.name: hobbyboard
