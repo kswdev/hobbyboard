@@ -8,7 +8,9 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Service
@@ -18,6 +20,7 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final AccountRepository accountRepository;
 
+    @Transactional
     public void processNewAccount(SignUpForm signUpForm) {
         Account saveAccount = saveAccount(signUpForm);
         saveAccount.generateEmailCheckToken();
@@ -44,7 +47,21 @@ public class AccountService {
         mailMessage.setTo(newAccount.getEmail());
         mailMessage.setSubject("회원 가입 인증");
         mailMessage.setText("/check-email-token?token=" + newAccount.getEmailCheckToken() +
-                "&email=" + newAccount.getEmail());
+                                              "&email=" + newAccount.getEmail());
         javaMailSender.send(mailMessage);
+    }
+
+    public Account confirmEmailProcess(String email, String token) {
+        Account findAccount = accountRepository.findByEmail(email);
+
+        if (findAccount == null)
+            throw new IllegalArgumentException();
+
+        if (findAccount.getEmailCheckToken().equals(token)) {
+            findAccount.setEmailVerified(true);
+            findAccount.setJoinedAt(LocalDateTime.now());
+        }
+
+        return findAccount;
     }
 }

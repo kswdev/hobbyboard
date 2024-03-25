@@ -14,10 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 
 @RequiredArgsConstructor
@@ -51,13 +48,23 @@ public class AccountController {
         BindingResult result,
         SessionStatus status
     ) {
-        System.out.println("********************************88");
-        if (result.hasErrors()) {
+        if (result.hasErrors())
             return "account/sign-up";
-        }
 
         accountService.processNewAccount(signUpForm);
         status.setComplete();
+
         return "redirect:/";
+    }
+
+    @GetMapping("/check-email-token")
+    public String checkEmailToken(
+            @RequestParam String email,
+            @RequestParam String token,
+            Model model
+    ) {
+        Account account = accountService.confirmEmailProcess(email, token);
+        model.addAttribute("nickname", account.getNickname());
+        return "account/checked-email";
     }
 }
