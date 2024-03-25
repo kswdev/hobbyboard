@@ -4,6 +4,7 @@ import com.hobbyboard.domain.account.dto.SignUpForm;
 import com.hobbyboard.domain.account.dto.SignUpFormValidator;
 import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.account.repository.AccountRepository;
+import com.hobbyboard.domain.account.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
@@ -24,9 +25,7 @@ import org.springframework.web.bind.support.SessionStatus;
 @SessionAttributes("signUpForm")
 public class AccountController {
 
-    private final JavaMailSender javaMailSender;
-    private final PasswordEncoder passwordEncoder;
-    private final AccountRepository accountRepository;
+    private final AccountService accountService;
     private final SignUpFormValidator signUpFormValidator;
 
     @InitBinder("signUpForm")
@@ -57,24 +56,7 @@ public class AccountController {
             return "account/sign-up";
         }
 
-        Account account = Account.builder()
-                .email(signUpForm.getEmail())
-                .nickname(signUpForm.getNickname())
-                .password(passwordEncoder.encode(signUpForm.getPassword()))
-                .studyCreatedByWeb(true)
-                .studyEnrollmentResultByWeb(true)
-                .studyUpdatedByWeb(true)
-                .build();
-
-        Account newAccount = accountRepository.save(account);
-
-        newAccount.generateEmailCheckToken();
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(newAccount.getEmail());
-        mailMessage.setSubject("회원 가입 인증");
-        mailMessage.setText("/check-email-token?token=" + newAccount.getEmailCheckToken() +
-                                              "&email=" + newAccount.getEmail());
-        javaMailSender.send(mailMessage);
+        accountService.processNewAccount(signUpForm);
         status.setComplete();
         return "redirect:/";
     }
