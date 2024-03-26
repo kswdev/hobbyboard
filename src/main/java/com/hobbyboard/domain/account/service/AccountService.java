@@ -55,12 +55,13 @@ public class AccountService {
         Account findAccount = accountRepository.findByEmail(email);
 
         if (findAccount == null)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("email");
 
         if (findAccount.getEmailCheckToken().equals(token)) {
             findAccount.setEmailVerified(true);
             findAccount.setJoinedAt(LocalDateTime.now());
-        }
+        } else
+            throw new IllegalArgumentException("token");
 
         return findAccount;
     }

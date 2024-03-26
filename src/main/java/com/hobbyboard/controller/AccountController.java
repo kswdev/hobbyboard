@@ -67,4 +67,17 @@ public class AccountController {
         model.addAttribute("nickname", account.getNickname());
         return "account/checked-email";
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public String handle(
+            IllegalArgumentException exception,
+            Model model
+    ) {
+        if (exception.getMessage().equals("email"))
+            model.addAttribute("error", "wrong.email");
+        else
+            model.addAttribute("error", "wrong.token");
+
+        return "account/checked-email";
+    }
 }
