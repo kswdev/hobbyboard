@@ -5,6 +5,8 @@ import com.hobbyboard.domain.account.dto.SignUpFormValidator;
 import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.account.repository.AccountRepository;
 import com.hobbyboard.domain.account.service.AccountService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
@@ -46,12 +48,16 @@ public class AccountController {
     public String signUpSubmit(
         @Valid SignUpForm signUpForm,
         BindingResult result,
-        SessionStatus status
+        SessionStatus status,
+        HttpServletResponse response,
+        HttpServletRequest request
     ) {
         if (result.hasErrors())
             return "account/sign-up";
 
-        accountService.processNewAccount(signUpForm);
+        Account account = accountService.processNewAccount(signUpForm);
+        accountService.login(account, request, response);
+
         status.setComplete();
 
         return "redirect:/";
@@ -61,10 +67,15 @@ public class AccountController {
     public String checkEmailToken(
             @RequestParam String email,
             @RequestParam String token,
+            HttpServletResponse response,
+            HttpServletRequest request,
             Model model
     ) {
         Account account = accountService.confirmEmailProcess(email, token);
+        accountService.login(account, request, response);
+
         model.addAttribute("nickname", account.getNickname());
+
         return "account/checked-email";
     }
 
