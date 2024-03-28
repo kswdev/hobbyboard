@@ -1,3 +1,20 @@
 spring:
   profiles.active: local
   application.name: hobbyboard
+  devtools.livereload.port: 35730
+  datasource:
+    url: jdbc:h2:tcp://localhost:1521/test
+    username: sa
+    password:
+  jpa:
+    #    test ?????? ??? ??? ? ?? ???
+    defer-datasource-initialization: true
+    hibernate.ddl-auto: create
+    show-sql: true
+    properties:
+      #???? ???? ?? hibernate ?? ??
+      hibernate.format_sql: true
+      hibernate.default_batch_fetch_size: 100
+    open-in-view:
+  h2.console.enabled: false
+  sql.init.mode: always
