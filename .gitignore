@@ -1,0 +1,11 @@
+#####IntelliJ IDEA####
+.idea
+*.iws
+*.iml
+*.ipr
+
+
+build/
+
+#### NPM ####
+src/main/resources/static/node_modules
