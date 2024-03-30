@@ -1,4 +1,4 @@
-package com.hobbyboard.domain.account;
+package com.hobbyboard.domain.mail;
 
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;

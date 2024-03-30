@@ -1,4 +1,4 @@
-package com.hobbyboard.domain.account.dto;
+package com.hobbyboard.domain.account.dto.signUpForm;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -6,10 +6,12 @@ import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
+import java.io.Serializable;
+
 @Getter @Setter
 @Builder
 @AllArgsConstructor @NoArgsConstructor
-public class SignUpForm {
+public class SignUpForm implements Serializable {
 
     @NotBlank
     @Length(min = 3, max = 20)

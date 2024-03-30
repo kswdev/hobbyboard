@@ -1,12 +1,19 @@
 package com.hobbyboard.domain.account.entity;
 
 
+import com.hobbyboard.domain.account.converter.UserRoleConverter;
+import com.hobbyboard.domain.account.dto.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
+@ToString
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
 @Builder @AllArgsConstructor @NoArgsConstructor
@@ -22,6 +29,11 @@ public class Account {
     private String nickname;
 
     private String password;
+
+    @Builder.Default
+    @Convert(converter = UserRoleConverter.class)
+    private Set<RoleType> roleTypes = new HashSet<>();
+
     private boolean emailVerified;
     private String emailCheckToken;
     private LocalDateTime joinedAt;
@@ -47,9 +59,13 @@ public class Account {
     public void completeSignUp() {
         this.setEmailVerified(true);
         this.setJoinedAt(LocalDateTime.now());
+        this.roleTypes = Set.of(RoleType.USER);
     }
 
     public boolean isValidToken(String token) {
+        if (this.isEmailVerified())
+            throw new IllegalArgumentException("이미 인증된 이메일입니다.");
+
         return getEmailCheckToken().equals(token);
     }
 }

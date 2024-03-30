@@ -70,6 +70,26 @@ class AccountControllerTest {
                 .andExpect(authenticated());
     }
 
+    @DisplayName("회원 가입 처리 - 입력값 정상")
+    @Test
+    void signUpSubmit_with_right_input() throws Exception {
+
+        mockMvc.perform(post("/sign-up")
+                        .param("nickname", "ksw96")
+                        .param("email", "ksw96@gmail.com")
+                        .param("password", "1342412323")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/"))
+                .andExpect(authenticated());;
+
+        Account account = accountRepository.findByEmail("ksw96@gmail.com");
+
+        assertNotNull(account);
+        assertNotEquals(account.getPassword(), "1342412323");
+
+        then(javaMailSender).should().send(any(SimpleMailMessage.class));
+    }
 
     @DisplayName("회원 가입 화면 - 보이는지 테스트")
     @Test
@@ -95,26 +115,5 @@ class AccountControllerTest {
             .andExpect(view().name("account/sign-up"))
             .andExpect(unauthenticated());
 
-    }
-
-    @DisplayName("회원 가입 처리 - 입력값 정상")
-    @Test
-    void signUpSubmit_with_right_input() throws Exception {
-
-        mockMvc.perform(post("/sign-up")
-                        .param("nickname", "ksw96")
-                        .param("email", "ksw96@gmail.com")
-                        .param("password", "1342412323")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/"))
-                .andExpect(authenticated());;
-
-        Account account = accountRepository.findByEmail("ksw96@gmail.com");
-
-        assertNotNull(account);
-        assertNotEquals(account.getPassword(), "1342412323");
-
-        then(javaMailSender).should().send(any(SimpleMailMessage.class));
     }
 }

@@ -1,17 +1,16 @@
 package com.hobbyboard.domain.account.service;
 
-import com.hobbyboard.domain.account.dto.SignUpForm;
+import com.hobbyboard.domain.account.dto.AccountDto;
+import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
+import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.account.repository.AccountRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -19,31 +18,31 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 public class AccountService {
 
-    private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
     private final AccountRepository accountRepository;
     private final SecurityContextHolderStrategy securityContextHolderStrategy;
     private final SecurityContextRepository securityContextRepository;
 
     @Transactional
-    public Account processNewAccount(SignUpForm signUpForm) {
+    public Account saveAccount(SignUpForm signUpForm) {
 
-        Account saveAccount = saveAccount(signUpForm);
+        Account saveAccount = toAccount(signUpForm);
         saveAccount.generateEmailCheckToken();
-        sendSignUpConfirmEmail(saveAccount);
-
-        return saveAccount;
+        return accountRepository.save(saveAccount);
     }
 
-    private Account saveAccount(SignUpForm signUpForm) {
+    public Optional<Account> findByEmail(String email) {
+        return Optional.ofNullable(accountRepository.findByEmail(email));
+    }
 
-        Account newAccount = Account.builder()
+    private Account toAccount(SignUpForm signUpForm) {
+        return Account.builder()
                 .email(signUpForm.getEmail())
                 .nickname(signUpForm.getNickname())
                 .password(passwordEncoder.encode(signUpForm.getPassword()))
@@ -51,20 +50,10 @@ public class AccountService {
                 .studyEnrollmentResultByWeb(true)
                 .studyUpdatedByWeb(true)
                 .build();
-
-        return accountRepository.save(newAccount);
     }
 
-    public void sendSignUpConfirmEmail(Account newAccount) {
 
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(newAccount.getEmail());
-        mailMessage.setSubject("회원 가입 인증");
-        mailMessage.setText("/check-email-token?token=" + newAccount.getEmailCheckToken() +
-                                              "&email=" + newAccount.getEmail());
-        javaMailSender.send(mailMessage);
-    }
-
+    @Transactional
     public Account confirmEmailProcess(String email, String token) {
         Account findAccount = accountRepository.findByEmail(email);
 
@@ -79,14 +68,21 @@ public class AccountService {
         return findAccount;
     }
 
-    public void login(Account account, HttpServletRequest request, HttpServletResponse response) {
+    public void login(AccountDto account, HttpServletRequest request, HttpServletResponse response) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                account.getNickname(),
+                new UserAccount(account),
                 account.getPassword(),
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContext context = securityContextHolderStrategy.createEmptyContext();
         context.setAuthentication(token);
         securityContextHolderStrategy.setContext(context);
         securityContextRepository.saveContext(context, request, response);
+    }
+
+    @Transactional
+    public Account findAccountAndGenerateCheckToken(String emailId) {
+        Account account = accountRepository.findByEmail(emailId);
+        account.generateEmailCheckToken();
+        return account;
     }
 }

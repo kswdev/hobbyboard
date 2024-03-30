@@ -1,23 +1,26 @@
-package com.hobbyboard.controller;
+package com.hobbyboard.application.controller;
 
-import com.hobbyboard.domain.account.dto.SignUpForm;
-import com.hobbyboard.domain.account.dto.SignUpFormValidator;
+import com.hobbyboard.application.usacase.AccountMailUsacase;
+import com.hobbyboard.domain.account.dto.AccountDto;
+import com.hobbyboard.domain.account.dto.security.UserAccount;
+import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
+import com.hobbyboard.domain.account.dto.signUpForm.SignUpFormValidator;
 import com.hobbyboard.domain.account.entity.Account;
-import com.hobbyboard.domain.account.repository.AccountRepository;
+import com.hobbyboard.domain.account.mapper.AccountMapper;
 import com.hobbyboard.domain.account.service.AccountService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
+
+import java.security.Principal;
 
 @RequiredArgsConstructor
 @Controller
@@ -26,6 +29,8 @@ public class AccountController {
 
     private final AccountService accountService;
     private final SignUpFormValidator signUpFormValidator;
+    private final AccountMailUsacase accountMailUsacase;
+    private final AccountMapper accountMapper;
 
     @InitBinder("signUpForm")
     public void initBinder(WebDataBinder webDataBinder) {
@@ -38,6 +43,21 @@ public class AccountController {
         //키 값이 카멜 케이스로 모델 객체에 저장됨
         model.addAttribute(new SignUpForm());
         return "account/sign-up";
+    }
+
+    @GetMapping("/check-email/{email}")
+    public String emailConfirm(
+            @PathVariable String email,
+            Model model
+    ) {
+        model.addAttribute("email", email);
+        return "account/check-email";
+    }
+
+    @ResponseBody
+    @GetMapping("resend-confirm-email")
+    public Account resendConfirmEmail(Principal principal) {
+        return accountMailUsacase.resendConfirmEmail(principal.getName());
     }
 
     /*
@@ -55,7 +75,8 @@ public class AccountController {
         if (result.hasErrors())
             return "account/sign-up";
 
-        Account account = accountService.processNewAccount(signUpForm);
+        AccountDto account = accountMapper.toAccountDto(
+                accountMailUsacase.saveSignUpAndSendConfirmEmail(signUpForm));
         accountService.login(account, request, response);
 
         status.setComplete();
@@ -71,7 +92,9 @@ public class AccountController {
             HttpServletRequest request,
             Model model
     ) {
-        Account account = accountService.confirmEmailProcess(email, token);
+        AccountDto account = accountMapper.
+                toAccountDto(accountService.confirmEmailProcess(email, token));
+
         accountService.login(account, request, response);
 
         model.addAttribute("nickname", account.getNickname());

@@ -1,10 +1,9 @@
-package com.hobbyboard.domain.account.dto;
+package com.hobbyboard.domain.account.dto.signUpForm;
 
 import com.hobbyboard.domain.account.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
-import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 @RequiredArgsConstructor
