@@ -29,13 +29,52 @@
           <input type="password" class="form-control" id="token" name="token">
         </div>
       </div>
-      <button type="submit" class="btn btn-primary mb-2">인증하기</button>
+      <span class="target-time">
+        <span id="remaining-min">5</span> :
+        <span id="remaining-sec">00</span>
+      </span>
+      <button type="submit" id="complete" class="btn btn-primary mb-2">인증하기</button>
     </form>
 
     <div>
-      <a th:href="@{/resend-confirm-email}">인증 이메일 다시 보내기</a>
+      <a id="resend-button" href="#">인증 이메일 다시 보내기</a>
     </div>
   </div>
 </div>
+<script type="application/javascript">
+  const resendButton = document.getElementById('resend-button');
+  const remainingMin = document.getElementById("remaining-min");
+  const remainingSec = document.getElementById("remaining-sec");
+  const completeBtn  = document.getElementById("complete");
+  const staticTime = 300;
+
+  const takeTarget = () => {
+    let time = staticTime;
+    setInterval(function () {
+      if (time > 0) { // >= 0 으로하면 -1까지 출력된다.
+        time = time - 1; // 여기서 빼줘야 3분에서 3분 또 출력되지 않고, 바로 2분 59초로 넘어간다.
+        let min = Math.floor(time / 60);
+        let sec = String(time % 60).padStart(2, "0");
+        remainingMin.innerText = min;
+        remainingSec.innerText = sec;
+        // time = time - 1
+      } else {
+        completeBtn.disabled = true;
+      }
+    }, 1000);
+  };
+
+  resendButton.addEventListener('click', function () {
+    completeBtn.disabled = false;
+    fetch("/resend-confirm-email")
+        .then((response) => response.json())
+        .then((data) => {
+          takeTarget();
+        });
+  })
+
+  takeTarget();
+
+</script>
 </body>
 </html>

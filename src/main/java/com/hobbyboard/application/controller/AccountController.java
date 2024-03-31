@@ -2,7 +2,6 @@ package com.hobbyboard.application.controller;
 
 import com.hobbyboard.application.usacase.AccountMailUsacase;
 import com.hobbyboard.domain.account.dto.AccountDto;
-import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpFormValidator;
 import com.hobbyboard.domain.account.entity.Account;
@@ -12,7 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -57,6 +55,7 @@ public class AccountController {
     @ResponseBody
     @GetMapping("resend-confirm-email")
     public Account resendConfirmEmail(Principal principal) {
+        System.out.println(principal);
         return accountMailUsacase.resendConfirmEmail(principal.getName());
     }
 
@@ -77,6 +76,7 @@ public class AccountController {
 
         AccountDto account = accountMapper.toAccountDto(
                 accountMailUsacase.saveSignUpAndSendConfirmEmail(signUpForm));
+
         accountService.login(account, request, response);
 
         status.setComplete();
@@ -93,9 +93,7 @@ public class AccountController {
             Model model
     ) {
         AccountDto account = accountMapper.
-                toAccountDto(accountService.confirmEmailProcess(email, token));
-
-        accountService.login(account, request, response);
+                toAccountDto(accountMailUsacase.confirmEmailProcess(email, token));
 
         model.addAttribute("nickname", account.getNickname());
 

@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
@@ -33,12 +34,19 @@ public class AccountService {
     public Account saveAccount(SignUpForm signUpForm) {
 
         Account saveAccount = toAccount(signUpForm);
-        saveAccount.generateEmailCheckToken();
         return accountRepository.save(saveAccount);
     }
 
-    public Optional<Account> findByEmail(String email) {
-        return Optional.ofNullable(accountRepository.findByEmail(email));
+    public Optional<Account> findByEmail(String emailOrNickname) {
+        Account account = accountRepository.findByEmail(emailOrNickname);
+
+        if (account == null)
+            account = accountRepository.findByNickname(emailOrNickname);
+
+        if (account == null)
+            throw new UsernameNotFoundException(emailOrNickname);
+
+        return Optional.of(account);
     }
 
     private Account toAccount(SignUpForm signUpForm) {
@@ -52,22 +60,6 @@ public class AccountService {
                 .build();
     }
 
-
-    @Transactional
-    public Account confirmEmailProcess(String email, String token) {
-        Account findAccount = accountRepository.findByEmail(email);
-
-        if (findAccount == null)
-            throw new IllegalArgumentException("email");
-
-        if (findAccount.isValidToken(token))
-            findAccount.completeSignUp();
-        else
-            throw new IllegalArgumentException("token");
-
-        return findAccount;
-    }
-
     public void login(AccountDto account, HttpServletRequest request, HttpServletResponse response) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                 new UserAccount(account),
@@ -79,10 +71,7 @@ public class AccountService {
         securityContextRepository.saveContext(context, request, response);
     }
 
-    @Transactional
-    public Account findAccountAndGenerateCheckToken(String emailId) {
-        Account account = accountRepository.findByEmail(emailId);
-        account.generateEmailCheckToken();
-        return account;
+    public void save(Account findAccount) {
+        accountRepository.save(findAccount);
     }
 }

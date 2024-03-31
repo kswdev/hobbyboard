@@ -35,7 +35,6 @@ public class Account {
     private Set<RoleType> roleTypes = new HashSet<>();
 
     private boolean emailVerified;
-    private String emailCheckToken;
     private LocalDateTime joinedAt;
     private String bio;
     private String url;
@@ -52,20 +51,9 @@ public class Account {
     private boolean studyUpdatedByWeb;
     private boolean studyUpdatedResultByEmail;
 
-    public void generateEmailCheckToken() {
-        this.emailCheckToken = UUID.randomUUID().toString();
-    }
-
     public void completeSignUp() {
         this.setEmailVerified(true);
         this.setJoinedAt(LocalDateTime.now());
         this.roleTypes = Set.of(RoleType.USER);
-    }
-
-    public boolean isValidToken(String token) {
-        if (this.isEmailVerified())
-            throw new IllegalArgumentException("이미 인증된 이메일입니다.");
-
-        return getEmailCheckToken().equals(token);
     }
 }

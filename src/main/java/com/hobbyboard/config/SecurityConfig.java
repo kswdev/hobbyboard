@@ -1,6 +1,7 @@
 package com.hobbyboard.config;
 
 import com.hobbyboard.domain.account.dto.security.UserAccount;
+import com.hobbyboard.domain.account.mapper.AccountMapper;
 import com.hobbyboard.domain.account.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -15,19 +16,23 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 
+import javax.sql.DataSource;
 import java.util.NoSuchElementException;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
+    private final DataSource dataSource;
 
     @Bean
     public SecurityFilterChain securityFilterChain(
+            AccountService accountService,
+            AccountMapper accountMapper,
             HttpSecurity http
     ) throws Exception {
 
@@ -44,20 +49,37 @@ public class SecurityConfig {
                                 "/login-link",
                                 "/node_modules/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/profile/*").permitAll()
+                        .requestMatchers(HttpMethod.GET).permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(withDefaults())
-                .logout(logout -> logout.logoutSuccessUrl("/"))
+                .formLogin(
+                        login -> login.loginPage("/login").permitAll())
+                .logout(
+                        logout -> logout.logoutSuccessUrl("/"))
+                .rememberMe(
+                        config -> config
+                                .userDetailsService(userDetailsService(accountService, accountMapper))
+                                .tokenRepository(tokenRepository()))
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .build();
     }
 
     @Bean
-    public UserDetailsService userDetailsService(AccountService accountService) {
+    public PersistentTokenRepository tokenRepository() {
+        JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
+        jdbcTokenRepository.setDataSource(dataSource);
+
+        return jdbcTokenRepository;
+    }
+    @Bean
+    public UserDetailsService userDetailsService(
+            AccountService accountService,
+            AccountMapper accountMapper
+    ) {
         return username -> accountService
                 .findByEmail(username)
+                .map(accountMapper::toAccountDto)
                 .map(UserAccount::new)
                 .orElseThrow(() -> new NoSuchElementException("없는 아이디입니다."));
     }
