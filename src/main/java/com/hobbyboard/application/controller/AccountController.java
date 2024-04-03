@@ -1,5 +1,6 @@
 package com.hobbyboard.application.controller;
 
+import com.hobbyboard.annotation.CurrentUser;
 import com.hobbyboard.application.usacase.AccountMailUsacase;
 import com.hobbyboard.domain.account.dto.AccountDto;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.support.SessionStatus;
 
 import java.security.Principal;
 
+@Slf4j
 @RequiredArgsConstructor
 @Controller
 @SessionAttributes("signUpForm")
@@ -111,5 +114,22 @@ public class AccountController {
             model.addAttribute("error", "wrong.token");
 
         return "account/checked-email";
+    }
+
+    @GetMapping("/profile/{nickname}")
+    public String viewProfile(
+            @PathVariable String nickname,
+            @CurrentUser AccountDto account,
+            Model model
+    ) {
+        AccountDto byNickname = accountMapper.toAccountDto(
+                accountService.findByNickname(nickname));
+
+        if (byNickname == null)
+            throw new IllegalArgumentException(nickname + " 에 해당하는 사용자가 없습니다.");
+
+        model.addAttribute("account", byNickname);
+        model.addAttribute("isOwner", byNickname.getId().equals(account.getId()));
+        return "account/profile";
     }
 }

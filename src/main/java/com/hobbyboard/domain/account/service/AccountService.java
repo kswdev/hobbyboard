@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class AccountService {
 
@@ -30,13 +31,13 @@ public class AccountService {
     private final SecurityContextHolderStrategy securityContextHolderStrategy;
     private final SecurityContextRepository securityContextRepository;
 
-    @Transactional
     public Account saveAccount(SignUpForm signUpForm) {
 
         Account saveAccount = toAccount(signUpForm);
         return accountRepository.save(saveAccount);
     }
 
+    @Transactional(readOnly = true)
     public Optional<Account> findByEmail(String emailOrNickname) {
         Account account = accountRepository.findByEmail(emailOrNickname);
 
@@ -73,5 +74,14 @@ public class AccountService {
 
     public void save(Account findAccount) {
         accountRepository.save(findAccount);
+    }
+
+    @Transactional(readOnly = true)
+    public Account findByNickname(String nickname) {
+        return accountRepository.findByNickname(nickname);
+    }
+
+    public void completeSignUp(Account findAccount) {
+        findAccount.completeSignUp();
     }
 }

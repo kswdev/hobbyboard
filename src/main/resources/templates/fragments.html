@@ -147,10 +147,10 @@
                     <li class="dropdown-header">
                         <span sec:authentication="name">Username</span>
                     </li>
-                    <li class="dropdown-item" th:href="@{'/profile/' + ${#authentication.name}}">프로필</li>
+                    <li class="dropdown-item"><a th:href="@{'/profile/' + ${#authentication.name}}">프로필</a></li>
                     <li class="dropdown-item" >모임</li>
                     <li class="dropdown-divider"></li>
-                    <li class="dropdown-item" href="#" th:href="@{'/settings/profile'}">설정</li>
+                    <li class="dropdown-item"><a th:href="@{'/settings/profile'}">설정</a></li>
                     <li>
                         <form class="form-inline my-2 my-lg-0" action="#" th:action="@{/logout}" method="post">
                             <button class="dropdown-item" type="submit">로그아웃</button>

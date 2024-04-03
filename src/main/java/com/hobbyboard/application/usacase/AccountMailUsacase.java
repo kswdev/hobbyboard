@@ -20,10 +20,11 @@ public class AccountMailUsacase {
 
         return saveAccount;
     }
-    public Account resendConfirmEmail(String emailId) {
-        Account account = accountService
-                .findByEmail(emailId)
-                .orElseThrow(IllegalArgumentException::new);
+    public Account resendConfirmEmail(String nickname) {
+        Account account = accountService.findByNickname(nickname);
+
+        if (account == null)
+            throw new IllegalArgumentException(nickname + "은 없는 닉네임입니다.");
 
         mailService.sendSignUpConfirmEmail(account);
 
@@ -36,7 +37,7 @@ public class AccountMailUsacase {
                 .orElseThrow(() -> new IllegalArgumentException("email"));
 
         if (mailService.isValidToken(findAccount, token)) {
-            findAccount.completeSignUp();
+            accountService.completeSignUp(findAccount);
             accountService.save(findAccount);
         } else
             throw new IllegalArgumentException("token");

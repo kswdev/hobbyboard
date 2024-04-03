@@ -14,7 +14,7 @@ public class UserAccount extends User {
     private final AccountDto account;
 
     public UserAccount(AccountDto account) {
-        super(account.getEmail(), account.getPassword(), account
+        super(account.getNickname(), account.getPassword(), account
                 .getRoleTypes().stream()
                 .map(RoleType::getName)
                 .map(SimpleGrantedAuthority::new)
