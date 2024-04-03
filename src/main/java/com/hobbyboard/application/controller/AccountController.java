@@ -6,13 +6,13 @@ import com.hobbyboard.domain.account.dto.AccountDto;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpFormValidator;
 import com.hobbyboard.domain.account.entity.Account;
-import com.hobbyboard.domain.account.mapper.AccountMapper;
 import com.hobbyboard.domain.account.service.AccountService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -31,7 +31,6 @@ public class AccountController {
     private final AccountService accountService;
     private final SignUpFormValidator signUpFormValidator;
     private final AccountMailUsacase accountMailUsacase;
-    private final AccountMapper accountMapper;
 
     @InitBinder("signUpForm")
     public void initBinder(WebDataBinder webDataBinder) {
@@ -77,7 +76,7 @@ public class AccountController {
         if (result.hasErrors())
             return "account/sign-up";
 
-        AccountDto account = accountMapper.toAccountDto(
+        AccountDto account = AccountDto.fromAccount(
                 accountMailUsacase.saveSignUpAndSendConfirmEmail(signUpForm));
 
         accountService.login(account, request, response);
@@ -95,8 +94,8 @@ public class AccountController {
             HttpServletRequest request,
             Model model
     ) {
-        AccountDto account = accountMapper.
-                toAccountDto(accountMailUsacase.confirmEmailProcess(email, token));
+        AccountDto account = AccountDto.fromAccount(
+                accountMailUsacase.confirmEmailProcess(email, token));
 
         model.addAttribute("nickname", account.getNickname());
 
@@ -122,7 +121,7 @@ public class AccountController {
             @CurrentUser AccountDto account,
             Model model
     ) {
-        AccountDto byNickname = accountMapper.toAccountDto(
+        AccountDto byNickname = AccountDto.fromAccount(
                 accountService.findByNickname(nickname));
 
         if (byNickname == null)

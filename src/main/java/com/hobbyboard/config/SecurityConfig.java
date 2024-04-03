@@ -1,9 +1,12 @@
 package com.hobbyboard.config;
 
+import com.hobbyboard.domain.account.dto.AccountDto;
 import com.hobbyboard.domain.account.dto.security.UserAccount;
-import com.hobbyboard.domain.account.mapper.AccountMapper;
+import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.account.service.AccountService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,13 +29,14 @@ import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @Configuration
+@Slf4j
 public class SecurityConfig {
     private final DataSource dataSource;
 
     @Bean
     public SecurityFilterChain securityFilterChain(
             AccountService accountService,
-            AccountMapper accountMapper,
+            ModelMapper modelMapper,
             HttpSecurity http
     ) throws Exception {
 
@@ -58,7 +62,7 @@ public class SecurityConfig {
                         logout -> logout.logoutSuccessUrl("/"))
                 .rememberMe(
                         config -> config
-                                .userDetailsService(userDetailsService(accountService, accountMapper))
+                                .userDetailsService(userDetailsService(accountService, modelMapper))
                                 .tokenRepository(tokenRepository()))
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
@@ -75,13 +79,20 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(
             AccountService accountService,
-            AccountMapper accountMapper
+            ModelMapper modelMapper
     ) {
-        return username -> accountService
-                .findByEmail(username)
-                .map(accountMapper::toAccountDto)
-                .map(UserAccount::new)
-                .orElseThrow(() -> new NoSuchElementException("없는 아이디입니다."));
+        return username -> {
+            Account account = accountService
+                    .findByEmail(username)
+                    .orElseThrow(() -> new NoSuchElementException("없는 아이디입니다."));
+
+            log.info("accountEntity : {}", account);
+
+            AccountDto accountDto = AccountDto.fromAccount(account);
+
+            log.info("accountDto : {}", accountDto);
+            return new UserAccount(accountDto);
+        };
     }
 
     @Bean

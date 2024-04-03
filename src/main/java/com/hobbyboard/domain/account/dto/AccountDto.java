@@ -1,9 +1,7 @@
 package com.hobbyboard.domain.account.dto;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.hobbyboard.domain.account.entity.Account;
+import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -60,5 +58,28 @@ public class AccountDto implements Serializable {
         this.studyEnrollmentResultByWeb = studyEnrollmentResultByWeb;
         this.studyUpdatedByWeb = studyUpdatedByWeb;
         this.studyUpdatedResultByEmail = studyUpdatedResultByEmail;
+    }
+
+    public static AccountDto fromAccount(Account account) {
+        return AccountDto.builder()
+                .id(account.getId())
+                .password(account.getPassword())
+                .email(account.getEmail())
+                .nickname(account.getNickname())
+                .roleTypes(account.getRoleTypes())
+                .emailVerified(account.isEmailVerified())
+                .joinedAt(account.getJoinedAt())
+                .bio(account.getBio())
+                .url(account.getUrl())
+                .occupation(account.getOccupation())
+                .location(account.getLocation())
+                .profileImage(account.getProfileImage())
+                .studyCreatedByEmail(account.isStudyCreatedByEmail())
+                .studyCreatedByWeb(account.isStudyCreatedByWeb())
+                .studyEnrollmentResultByEmail(account.isStudyEnrollmentResultByEmail())
+                .studyEnrollmentResultByWeb(account.isStudyEnrollmentResultByWeb())
+                .studyUpdatedByWeb(account.isStudyUpdatedByWeb())
+                .studyUpdatedResultByEmail(account.isStudyUpdatedResultByEmail())
+                .build();
     }
 }

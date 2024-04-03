@@ -5,7 +5,7 @@
 <head th:replace="fragments.html :: head"></head>
 <body class="bg-light">
     <div th:replace="fragments.html :: main-nav"></div>
-    <div class="alert alert-warning alert-dismissible fade show" sec:authorize="isAuthenticated()"  th:if="${!account.isEmailVerified()}" role="alert">
+    <div class="alert alert-warning alert-dismissible fade show" th:if="${!account.isEmailVerified()}" sec:authorize="isAuthenticated()" role="alert">
         <strong>필수! </strong>
         <a th:href="@{'/check-email/' + ${account.email}}">이메일 인증을 진행해주세요!</a>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
