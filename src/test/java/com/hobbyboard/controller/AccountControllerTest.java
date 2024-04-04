@@ -32,8 +32,6 @@ class AccountControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    AccountMapper accountMapper;
 
     @Autowired
     AccountRepository accountRepository;
@@ -70,8 +68,8 @@ class AccountControllerTest {
 
         String token  = mailService.setEmailCheckToken(account);
 
-        AccountDto newAccount =  accountMapper.
-                toAccountDto(accountMailUsacase.confirmEmailProcess(account.getEmail(), token));
+        AccountDto newAccount = AccountDto.fromAccount(
+                accountMailUsacase.confirmEmailProcess(account.getEmail(), token));
 
         mockMvc.perform(get("/check-email-token")
                         .param("token", token)

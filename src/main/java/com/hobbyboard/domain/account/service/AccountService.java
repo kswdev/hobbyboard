@@ -1,6 +1,7 @@
 package com.hobbyboard.domain.account.service;
 
 import com.hobbyboard.domain.account.dto.AccountDto;
+import com.hobbyboard.domain.account.dto.Profile;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
 import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.account.entity.Account;
@@ -8,6 +9,7 @@ import com.hobbyboard.domain.account.repository.AccountRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -26,6 +28,7 @@ import java.util.Optional;
 @Service
 public class AccountService {
 
+    private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final AccountRepository accountRepository;
     private final SecurityContextHolderStrategy securityContextHolderStrategy;
@@ -83,5 +86,15 @@ public class AccountService {
 
     public void completeSignUp(Account findAccount) {
         findAccount.completeSignUp();
+    }
+
+    public void updateProfile(AccountDto accountDto, Profile profile) {
+        Account account = modelMapper.map(accountDto, Account.class);
+        account.setUrl(profile.getUrl());
+        account.setOccupation(profile.getOccupation());
+        account.setLocation(profile.getLocation());
+        account.setBio(profile.getBio());
+
+        accountRepository.save(account);
     }
 }
