@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -35,6 +36,13 @@ class SettingsControllerTest {
     @BeforeEach
     void before() {
         accountRepository.deleteAll();
+        Account account = Account.builder()
+                .nickname("nickname")
+                .email("email@naver.com")
+                .password("password")
+                .build();
+
+        accountRepository.save(account);
     }
 
 
@@ -63,12 +71,12 @@ class SettingsControllerTest {
                         .param("bio", bio)
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(redirectedUrl("/settings/profile"))
-                .andExpect(flash().attributeExists("message"))
-                .andExpect(flash().attributeExists("profile"))
+                .andExpect(view().name("settings/profile"))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("profile"))
                 .andExpect(model().hasErrors());
 
-        Account account = accountRepository.findByEmail("nickname");
-        assertEquals(bio, account.getBio());
+        Account account = accountRepository.findByNickname("nickname");
+        assertNull(account.getBio());
     }
 }

@@ -90,8 +90,6 @@ public class AccountController {
     public String checkEmailToken(
             @RequestParam String email,
             @RequestParam String token,
-            HttpServletResponse response,
-            HttpServletRequest request,
             Model model
     ) {
         AccountDto account = AccountDto.fromAccount(

@@ -3,14 +3,18 @@ package com.hobbyboard.domain.account.dto;
 import com.hobbyboard.domain.account.entity.Account;
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @NoArgsConstructor
-@Getter
+@Getter @Setter
 public class AccountDto implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 6529685098267757690L;
 
     private Long id;
 

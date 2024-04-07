@@ -2,6 +2,7 @@ package com.hobbyboard.domain.account.service;
 
 import com.hobbyboard.domain.account.dto.AccountDto;
 import com.hobbyboard.domain.account.dto.Profile;
+import com.hobbyboard.domain.account.dto.passwordForm.PasswordForm;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
 import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.account.entity.Account;
@@ -88,13 +89,26 @@ public class AccountService {
         findAccount.completeSignUp();
     }
 
-    public void updateProfile(AccountDto accountDto, Profile profile) {
+
+    public AccountDto updateProfile(AccountDto accountDto, Profile profile) {
+        accountDto.setUrl(profile.getUrl());
+        accountDto.setOccupation(profile.getOccupation());
+        accountDto.setLocation(profile.getLocation());
+        accountDto.setBio(profile.getBio());
+        accountDto.setProfileImage(profile.getProfileImage());
+
         Account account = modelMapper.map(accountDto, Account.class);
-        account.setUrl(profile.getUrl());
-        account.setOccupation(profile.getOccupation());
-        account.setLocation(profile.getLocation());
-        account.setBio(profile.getBio());
 
         accountRepository.save(account);
+
+        return accountDto;
+    }
+
+    public AccountDto updatePassword(AccountDto accountDto, PasswordForm passwordForm) {
+
+        Account account = accountRepository.findByNickname(accountDto.getNickname());
+        account.setPassword(passwordEncoder.encode(passwordForm.getNewPassword()));
+
+        return AccountDto.fromAccount(account);
     }
 }
