@@ -4,6 +4,7 @@ import com.hobbyboard.annotation.CurrentUser;
 import com.hobbyboard.domain.account.dto.AccountDto;
 import com.hobbyboard.domain.account.dto.Profile;
 import com.hobbyboard.domain.account.dto.passwordForm.PasswordForm;
+import com.hobbyboard.domain.account.dto.passwordForm.PasswordFormValidator;
 import com.hobbyboard.domain.account.service.AccountService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -20,16 +23,20 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class SettingsController {
 
-    private final AccountService accountService;
+    @InitBinder("passwordForm")
+    public void initBinder(WebDataBinder webDataBinder) {
+        webDataBinder.addValidators(passwordFormValidator);
+    }
 
+    private final PasswordFormValidator passwordFormValidator;
+    private final AccountService accountService;
     private final String SETTINGS_PROFILE_VIEW_NAME = "settings/profile";
     private final String SETTINGS_PROFILE_URL = "/settings/profile";
-
     private final String SETTINGS_PASSWORD_VIEW_NAME = "settings/password";
     private final String SETTINGS_PASSWORD_URL = "/settings/password";
 
     @GetMapping(SETTINGS_PROFILE_URL)
-    public String profileUpdateForm(
+    public String updateProfileForm(
             @CurrentUser AccountDto accountDto,
             Model model
     ) {
@@ -69,7 +76,7 @@ public class SettingsController {
     ) {
         model.addAttribute("account", accountDto);
         model.addAttribute(new PasswordForm());
-        return "settings/password";
+        return SETTINGS_PASSWORD_VIEW_NAME;
     }
 
     @PostMapping(SETTINGS_PASSWORD_URL)
@@ -85,12 +92,6 @@ public class SettingsController {
         if (errors.hasErrors()) {
             model.addAttribute(passwordForm);
             return SETTINGS_PASSWORD_VIEW_NAME;
-        }
-
-        if (!passwordForm.passwordCheck()) {
-            model.addAttribute(passwordForm);
-            attributes.addFlashAttribute("message", "입력하신 비밀번호가 같지 않습니다.");
-            return "redirect:/" + SETTINGS_PASSWORD_VIEW_NAME;
         }
 
         AccountDto updatePassword = accountService.updatePassword(accountDto, passwordForm);
