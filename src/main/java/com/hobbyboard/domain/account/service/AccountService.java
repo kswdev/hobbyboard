@@ -91,17 +91,11 @@ public class AccountService {
 
 
     public AccountDto updateProfile(AccountDto accountDto, Profile profile) {
-        accountDto.setUrl(profile.getUrl());
-        accountDto.setOccupation(profile.getOccupation());
-        accountDto.setLocation(profile.getLocation());
-        accountDto.setBio(profile.getBio());
-        accountDto.setProfileImage(profile.getProfileImage());
 
-        Account account = modelMapper.map(accountDto, Account.class);
+        Account account = accountRepository.findByNickname(accountDto.getNickname());
+        account.updateProfile(profile);
 
-        accountRepository.save(account);
-
-        return accountDto;
+        return AccountDto.fromAccount(account);
     }
 
     public AccountDto updatePassword(AccountDto accountDto, PasswordForm passwordForm) {

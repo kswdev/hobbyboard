@@ -2,6 +2,7 @@ package com.hobbyboard.domain.account.entity;
 
 
 import com.hobbyboard.domain.account.converter.UserRoleConverter;
+import com.hobbyboard.domain.account.dto.Profile;
 import com.hobbyboard.domain.account.dto.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -55,5 +56,13 @@ public class Account {
         this.setEmailVerified(true);
         this.setJoinedAt(LocalDateTime.now());
         this.roleTypes = Set.of(RoleType.USER);
+    }
+
+    public void updateProfile(Profile profile) {
+        this.setUrl(profile.getUrl());
+        this.setOccupation(profile.getOccupation());
+        this.setLocation(profile.getLocation());
+        this.setBio(profile.getBio());
+        this.setProfileImage(profile.getProfileImage());
     }
 }

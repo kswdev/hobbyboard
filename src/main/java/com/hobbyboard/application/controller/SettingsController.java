@@ -30,10 +30,10 @@ public class SettingsController {
 
     private final PasswordFormValidator passwordFormValidator;
     private final AccountService accountService;
-    private final String SETTINGS_PROFILE_VIEW_NAME = "settings/profile";
-    private final String SETTINGS_PROFILE_URL = "/settings/profile";
-    private final String SETTINGS_PASSWORD_VIEW_NAME = "settings/password";
-    private final String SETTINGS_PASSWORD_URL = "/settings/password";
+    public final static String SETTINGS_PROFILE_VIEW_NAME = "/settings/profile";
+    public final static String SETTINGS_PROFILE_URL = "/settings/profile";
+    public final static String SETTINGS_PASSWORD_VIEW_NAME = "/settings/password";
+    public final static String SETTINGS_PASSWORD_URL = "/settings/password";
 
     @GetMapping(SETTINGS_PROFILE_URL)
     public String updateProfileForm(
@@ -66,7 +66,7 @@ public class SettingsController {
         accountService.login(updatedAccountDto, request, response);
 
         attributes.addFlashAttribute("message", "프로필을 수정했습니다.");
-        return "redirect:/" + SETTINGS_PROFILE_VIEW_NAME;
+        return "redirect:" + SETTINGS_PROFILE_VIEW_NAME;
     }
 
     @GetMapping(SETTINGS_PASSWORD_URL)
@@ -98,6 +98,6 @@ public class SettingsController {
         accountService.login(updatePassword, request, response);
 
         attributes.addFlashAttribute("message", "비밀번호를 수정했습니다.");
-        return "redirect:/" + SETTINGS_PASSWORD_VIEW_NAME;
+        return "redirect:" + SETTINGS_PASSWORD_VIEW_NAME;
     }
 }
