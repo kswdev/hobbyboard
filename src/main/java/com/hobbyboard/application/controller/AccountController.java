@@ -12,13 +12,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 
@@ -35,6 +35,41 @@ public class AccountController {
     @InitBinder("signUpForm")
     public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(signUpFormValidator);
+    }
+
+    @GetMapping("email-login")
+    public String emailLoginForm() {
+        return "account/email-login";
+    }
+
+    @PostMapping("email-login")
+    public String emailLogin(
+            @RequestParam String email,
+            RedirectAttributes attributes,
+            Model model
+    ) {
+        AccountDto account = accountService.findByEmail(email);
+
+        if (account == null) {
+            model.addAttribute("error", "wrong.email");
+            return "account/email-login";
+        }
+
+        accountMailUsacase.sendPasswordChangeEmail(email);
+        attributes.addFlashAttribute("message", "메일을 보냈습니다.");
+
+        return "redirect:/email-login";
+    }
+
+    @GetMapping("login-by-email")
+    public String loginByEmail(
+            @RequestParam String email,
+            @RequestParam String token,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        accountMailUsacase.confirmLoginByEmailProcess(email, token, request, response);
+        return "redirect:/settings/password";
     }
 
     @GetMapping("/sign-up")
@@ -79,7 +114,7 @@ public class AccountController {
         AccountDto account = AccountDto.fromAccount(
                 accountMailUsacase.saveSignUpAndSendConfirmEmail(signUpForm));
 
-        accountService.login(account, request, response);
+        accountService.updateAuthentication(account, request, response);
 
         status.setComplete();
 

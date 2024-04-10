@@ -2,6 +2,8 @@ package com.hobbyboard.domain.account.service;
 
 import com.hobbyboard.domain.account.dto.AccountDto;
 import com.hobbyboard.domain.account.dto.Profile;
+import com.hobbyboard.domain.account.dto.nickname.NicknameForm;
+import com.hobbyboard.domain.account.dto.notification.Notifications;
 import com.hobbyboard.domain.account.dto.passwordForm.PasswordForm;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
 import com.hobbyboard.domain.account.dto.security.UserAccount;
@@ -10,6 +12,7 @@ import com.hobbyboard.domain.account.repository.AccountRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -42,7 +46,7 @@ public class AccountService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Account> findByEmail(String emailOrNickname) {
+    public Optional<Account> findByEmailAndNickname(String emailOrNickname) {
         Account account = accountRepository.findByEmail(emailOrNickname);
 
         if (account == null)
@@ -65,7 +69,7 @@ public class AccountService {
                 .build();
     }
 
-    public void login(AccountDto account, HttpServletRequest request, HttpServletResponse response) {
+    public void updateAuthentication(AccountDto account, HttpServletRequest request, HttpServletResponse response) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                 new UserAccount(account),
                 account.getPassword(),
@@ -93,7 +97,7 @@ public class AccountService {
     public AccountDto updateProfile(AccountDto accountDto, Profile profile) {
 
         Account account = accountRepository.findByNickname(accountDto.getNickname());
-        account.updateProfile(profile);
+        modelMapper.map(profile, account);
 
         return AccountDto.fromAccount(account);
     }
@@ -104,5 +108,28 @@ public class AccountService {
         account.setPassword(passwordEncoder.encode(passwordForm.getNewPassword()));
 
         return AccountDto.fromAccount(account);
+    }
+
+    public AccountDto updateNotification(AccountDto accountDto, Notifications notifications) {
+
+        Account account = accountRepository.findByNickname(accountDto.getNickname());
+        modelMapper.map(notifications, account);
+
+        return AccountDto.fromAccount(account);
+    }
+
+    public AccountDto updateNickname(AccountDto accountDto, NicknameForm nicknameForm) {
+
+        Account account = accountRepository.findByNickname(accountDto.getNickname());
+        account.setNickname(nicknameForm.getNickname());
+
+        return AccountDto.fromAccount(account);
+    }
+
+    public AccountDto findByEmail(String email) {
+        return Optional.ofNullable(accountRepository.findByEmail(email))
+                .map(AccountDto::fromAccount)
+                .orElseThrow(() -> new IllegalArgumentException("email"));
+
     }
 }

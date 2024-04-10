@@ -39,11 +39,11 @@ public class AccountDto implements Serializable {
     private boolean studyCreatedByWeb;
     private boolean studyEnrollmentResultByEmail;
     private boolean studyEnrollmentResultByWeb;
+    private boolean studyUpdatedByEmail;
     private boolean studyUpdatedByWeb;
-    private boolean studyUpdatedResultByEmail;
 
     @Builder
-    public AccountDto(Long id, String email, String nickname, String password, Set<RoleType> roleTypes, boolean emailVerified, LocalDateTime joinedAt, String bio, String url, String occupation, String location, String profileImage, boolean studyCreatedByEmail, boolean studyCreatedByWeb, boolean studyEnrollmentResultByEmail, boolean studyEnrollmentResultByWeb, boolean studyUpdatedByWeb, boolean studyUpdatedResultByEmail) {
+    public AccountDto(Long id, String email, String nickname, String password, Set<RoleType> roleTypes, boolean emailVerified, LocalDateTime joinedAt, String bio, String url, String occupation, String location, String profileImage, boolean studyCreatedByEmail, boolean studyCreatedByWeb, boolean studyEnrollmentResultByEmail, boolean studyEnrollmentResultByWeb, boolean studyUpdatedByWeb, boolean studyUpdatedByEmail) {
         this.id = id;
         this.email = email;
         this.nickname = nickname;
@@ -61,7 +61,7 @@ public class AccountDto implements Serializable {
         this.studyEnrollmentResultByEmail = studyEnrollmentResultByEmail;
         this.studyEnrollmentResultByWeb = studyEnrollmentResultByWeb;
         this.studyUpdatedByWeb = studyUpdatedByWeb;
-        this.studyUpdatedResultByEmail = studyUpdatedResultByEmail;
+        this.studyUpdatedByEmail = studyUpdatedByEmail;
     }
 
     public static AccountDto fromAccount(Account account) {
@@ -83,7 +83,7 @@ public class AccountDto implements Serializable {
                 .studyEnrollmentResultByEmail(account.isStudyEnrollmentResultByEmail())
                 .studyEnrollmentResultByWeb(account.isStudyEnrollmentResultByWeb())
                 .studyUpdatedByWeb(account.isStudyUpdatedByWeb())
-                .studyUpdatedResultByEmail(account.isStudyUpdatedResultByEmail())
+                .studyUpdatedByEmail(account.isStudyUpdatedByEmail())
                 .build();
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.hobbyboard.application.controller.SettingsController.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,6 +38,8 @@ class SettingsControllerTest {
 
     private final static String SETTINGS_PROFILE_URL = "/settings/profile";
     private final static String SETTINGS_PASSWORD_URL = "/settings/password";
+    private final static String SETTINGS_NOTIFICATION_URL = "/settings/notifications";
+    private final static String SETTINGS_ACCOUNT_URL = "/settings/account";
 
     @BeforeEach
     void before() {
@@ -44,10 +47,41 @@ class SettingsControllerTest {
         Account account = Account.builder()
                 .nickname("nickname")
                 .email("email@naver.com")
-                .password("password")
+                .password(passwordEncoder.encode("password"))
                 .build();
 
         accountRepository.save(account);
+    }
+
+    @WithAccount
+    @DisplayName("계정 닉네임 수정")
+    @Test
+    void updateNickname_form() throws Exception {
+        mockMvc.perform(get(SETTINGS_ACCOUNT_URL))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("nicknameForm"));
+    }
+
+    @WithAccount
+    @DisplayName("알림 수정 폼")
+    @Test
+    void updateNotification_form() throws Exception {
+        mockMvc.perform(get(SETTINGS_NOTIFICATION_URL))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("notifications"));
+    }
+
+    @WithAccount
+    @DisplayName("알림 수정 폼")
+    @Test
+    void updateNotification_form_success() throws Exception {
+        mockMvc.perform(post(SETTINGS_NOTIFICATION_URL)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("message"))
+                .andExpect(flash().attributeExists("notifications"));
     }
 
     @WithAccount
@@ -71,7 +105,7 @@ class SettingsControllerTest {
                         .param("newPasswordConfirm", "12345678")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(SettingsController.SETTINGS_PASSWORD_VIEW_NAME))
+                .andExpect(redirectedUrl(ROOT + SETTINGS + PASSWORD))
                 .andExpect(flash().attributeExists("message"));
 
         Account byNickname = accountRepository.findByNickname("nickname");

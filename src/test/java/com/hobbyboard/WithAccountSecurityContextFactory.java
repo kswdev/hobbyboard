@@ -7,6 +7,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
 import java.util.Collections;
@@ -18,10 +20,12 @@ public class WithAccountSecurityContextFactory implements WithSecurityContextFac
     @Override
     public SecurityContext createSecurityContext(WithAccount annotation) {
 
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
         AccountDto account = AccountDto.builder()
                 .nickname(annotation.nickname())
                 .email(annotation.email())
-                .password(annotation.password())
+                .password(passwordEncoder.encode(annotation.password()))
                 .roleTypes(Set.of(annotation.role()))
                 .build();
 

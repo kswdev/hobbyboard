@@ -4,15 +4,13 @@ package com.hobbyboard.domain.account.entity;
 import com.hobbyboard.domain.account.converter.UserRoleConverter;
 import com.hobbyboard.domain.account.dto.Profile;
 import com.hobbyboard.domain.account.dto.RoleType;
+import com.hobbyboard.domain.account.dto.notification.Notifications;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
 
 @ToString
 @Entity
@@ -50,19 +48,11 @@ public class Account {
     private boolean studyEnrollmentResultByEmail;
     private boolean studyEnrollmentResultByWeb;
     private boolean studyUpdatedByWeb;
-    private boolean studyUpdatedResultByEmail;
+    private boolean studyUpdatedByEmail;
 
     public void completeSignUp() {
         this.setEmailVerified(true);
         this.setJoinedAt(LocalDateTime.now());
         this.roleTypes = Set.of(RoleType.USER);
-    }
-
-    public void updateProfile(Profile profile) {
-        this.setUrl(profile.getUrl());
-        this.setOccupation(profile.getOccupation());
-        this.setLocation(profile.getLocation());
-        this.setBio(profile.getBio());
-        this.setProfileImage(profile.getProfileImage());
     }
 }

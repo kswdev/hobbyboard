@@ -83,7 +83,7 @@ public class SecurityConfig {
     ) {
         return username -> {
             Account account = accountService
-                    .findByEmail(username)
+                    .findByEmailAndNickname(username)
                     .orElseThrow(() -> new NoSuchElementException("없는 아이디입니다."));
 
             log.info("accountEntity : {}", account);

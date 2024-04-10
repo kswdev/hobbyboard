@@ -1,10 +1,12 @@
 package com.hobbyboard.controller;
 
+import com.hobbyboard.WithAccount;
 import com.hobbyboard.application.usacase.AccountMailUsacase;
 import com.hobbyboard.domain.account.dto.AccountDto;
 import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.account.repository.AccountRepository;
 import com.hobbyboard.domain.mail.service.MailService;
+import lombok.With;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +44,14 @@ class AccountControllerTest {
     @Autowired
     MailService mailService;
 
+    @WithAccount
     @DisplayName("인증 메일 확인 - 입력값 오류")
     @Test
     void checkEmailToken_with_wrong_input() throws Exception {
 
         mockMvc.perform(get("/check-email-token")
                 .param("token", "sdfsdfdd")
-                .param("email", "email@email.com"))
+                .param("email", "email@naver.com"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("error"))
                 .andExpect(view().name("account/checked-email"));
