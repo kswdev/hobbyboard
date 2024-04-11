@@ -1,6 +1,7 @@
 package com.hobbyboard.domain.account.dto;
 
 import com.hobbyboard.domain.account.entity.Account;
+import com.hobbyboard.domain.account.entity.AccountTag;
 import lombok.*;
 
 import java.io.Serial;
@@ -9,8 +10,8 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-@NoArgsConstructor
-@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Getter @Setter @Builder
 public class AccountDto implements Serializable {
 
     @Serial
@@ -25,6 +26,7 @@ public class AccountDto implements Serializable {
     private String password;
 
     private Set<RoleType> roleTypes = new HashSet<>();
+    private Set<AccountTag> accountTags = new HashSet<>();
 
     private boolean emailVerified;
     private LocalDateTime joinedAt;
@@ -42,28 +44,6 @@ public class AccountDto implements Serializable {
     private boolean studyUpdatedByEmail;
     private boolean studyUpdatedByWeb;
 
-    @Builder
-    public AccountDto(Long id, String email, String nickname, String password, Set<RoleType> roleTypes, boolean emailVerified, LocalDateTime joinedAt, String bio, String url, String occupation, String location, String profileImage, boolean studyCreatedByEmail, boolean studyCreatedByWeb, boolean studyEnrollmentResultByEmail, boolean studyEnrollmentResultByWeb, boolean studyUpdatedByWeb, boolean studyUpdatedByEmail) {
-        this.id = id;
-        this.email = email;
-        this.nickname = nickname;
-        this.password = password;
-        this.roleTypes = roleTypes;
-        this.emailVerified = emailVerified;
-        this.joinedAt = joinedAt;
-        this.bio = bio;
-        this.url = url;
-        this.occupation = occupation;
-        this.location = location;
-        this.profileImage = profileImage;
-        this.studyCreatedByEmail = studyCreatedByEmail;
-        this.studyCreatedByWeb = studyCreatedByWeb;
-        this.studyEnrollmentResultByEmail = studyEnrollmentResultByEmail;
-        this.studyEnrollmentResultByWeb = studyEnrollmentResultByWeb;
-        this.studyUpdatedByWeb = studyUpdatedByWeb;
-        this.studyUpdatedByEmail = studyUpdatedByEmail;
-    }
-
     public static AccountDto fromAccount(Account account) {
         return AccountDto.builder()
                 .id(account.getId())
@@ -71,6 +51,7 @@ public class AccountDto implements Serializable {
                 .email(account.getEmail())
                 .nickname(account.getNickname())
                 .roleTypes(account.getRoleTypes())
+                .accountTags(account.getAccountTags())
                 .emailVerified(account.isEmailVerified())
                 .joinedAt(account.getJoinedAt())
                 .bio(account.getBio())

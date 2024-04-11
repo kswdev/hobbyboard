@@ -9,20 +9,23 @@ import com.hobbyboard.domain.account.dto.notification.Notifications;
 import com.hobbyboard.domain.account.dto.passwordForm.PasswordForm;
 import com.hobbyboard.domain.account.dto.passwordForm.PasswordFormValidator;
 import com.hobbyboard.domain.account.service.AccountService;
+import com.hobbyboard.domain.tag.dto.TagForm;
+import com.hobbyboard.domain.tag.entity.Tag;
+import com.hobbyboard.domain.tag.repository.TagRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Optional;
 
 import static com.hobbyboard.application.controller.SettingsController.*;
 
@@ -35,6 +38,7 @@ public class SettingsController {
     private final NicknameFormValidator nicknameFormValidator;
     private final AccountService accountService;
     private final ModelMapper modelMapper;
+    private final TagRepository tagRepository;
 
     static final String ROOT = "/";
     static final String SETTINGS = "settings";
@@ -42,6 +46,7 @@ public class SettingsController {
     static final String PASSWORD = "/password";
     static final String NOTIFICATIONS = "/notifications";
     static final String ACCOUNT = "/account";
+    static final String TAGS = "/tags";
 
     @InitBinder("passwordForm")
     public void passwordBinder(WebDataBinder webDataBinder) {
@@ -53,7 +58,46 @@ public class SettingsController {
         webDataBinder.addValidators(nicknameFormValidator);
     }
 
+    @GetMapping(TAGS)
+    public String updateTags(
+            @CurrentUser AccountDto accountDto,
+            Model model
+    ) {
+        model.addAttribute("account", accountDto);
+        return SETTINGS + TAGS;
+    }
 
+    @PostMapping(TAGS + "/add")
+    @ResponseBody
+    public ResponseEntity<Void> addTag(
+            @CurrentUser AccountDto accountDto,
+            @RequestBody TagForm tagForm
+    ) {
+        String title = tagForm.getTagTitle();
+
+        Tag tag = tagRepository.findByTitle(title)
+                .orElseGet(() -> tagRepository.save(Tag.builder()
+                        .title(tagForm.getTagTitle())
+                        .build()));
+
+        accountService.addTag(accountDto, tag);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(TAGS + "/remove")
+    @ResponseBody
+    public ResponseEntity<Void> removeTag(
+            @CurrentUser AccountDto accountDto,
+            @RequestBody TagForm tagForm
+    ) {
+        String title = tagForm.getTagTitle();
+
+        Tag tag = tagRepository.findByTitle(title)
+                .orElseThrow(() -> new IllegalArgumentException("없는 태그"));
+
+        accountService.removeTag(accountDto, tag);
+        return ResponseEntity.ok().build();
+    }
     @GetMapping(ACCOUNT)
     public String updateAccountForm(
             @CurrentUser AccountDto accountDto,

@@ -8,7 +8,10 @@ import com.hobbyboard.domain.account.dto.passwordForm.PasswordForm;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
 import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.account.entity.Account;
+import com.hobbyboard.domain.account.entity.AccountTag;
 import com.hobbyboard.domain.account.repository.AccountRepository;
+import com.hobbyboard.domain.account.repository.AccountTagRepository;
+import com.hobbyboard.domain.tag.entity.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,7 @@ public class AccountService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final AccountRepository accountRepository;
+    private final AccountTagRepository accountTagRepository;
     private final SecurityContextHolderStrategy securityContextHolderStrategy;
     private final SecurityContextRepository securityContextRepository;
 
@@ -131,5 +135,21 @@ public class AccountService {
                 .map(AccountDto::fromAccount)
                 .orElseThrow(() -> new IllegalArgumentException("email"));
 
+    }
+
+    @Transactional
+    public void addTag(AccountDto accountDto, Tag tag) {
+        AccountTag accountTag = AccountTag.builder()
+                .account(modelMapper.map(accountDto, Account.class))
+                .tag(tag)
+                .build();
+
+        accountTagRepository.findByAccountIdAndTagId(accountDto.getId(), tag.getId())
+                .orElseGet(() -> accountTagRepository.save(accountTag));
+    }
+
+    public void removeTag(AccountDto accountDto, Tag tag) {
+        accountTagRepository.
+                deleteByAccountIdAndTagId(tag.getId(), accountDto.getId());
     }
 }

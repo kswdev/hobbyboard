@@ -2,9 +2,7 @@ package com.hobbyboard.domain.account.entity;
 
 
 import com.hobbyboard.domain.account.converter.UserRoleConverter;
-import com.hobbyboard.domain.account.dto.Profile;
 import com.hobbyboard.domain.account.dto.RoleType;
-import com.hobbyboard.domain.account.dto.notification.Notifications;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -49,6 +47,9 @@ public class Account {
     private boolean studyEnrollmentResultByWeb;
     private boolean studyUpdatedByWeb;
     private boolean studyUpdatedByEmail;
+
+    @OneToMany(mappedBy = "account")
+    private Set<AccountTag> accountTags;
 
     public void completeSignUp() {
         this.setEmailVerified(true);

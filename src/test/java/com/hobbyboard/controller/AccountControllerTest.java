@@ -69,7 +69,7 @@ class AccountControllerTest {
 
         accountRepository.save(account);
 
-        String token  = mailService.setEmailCheckToken(account);
+        String token  = mailService.setEmailCheckToken(account.getEmail());
 
         AccountDto newAccount = AccountDto.fromAccount(
                 accountMailUsacase.confirmEmailProcess(account.getEmail(), token));
