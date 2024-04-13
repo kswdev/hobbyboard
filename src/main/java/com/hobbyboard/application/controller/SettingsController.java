@@ -1,21 +1,30 @@
 package com.hobbyboard.application.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hobbyboard.annotation.CurrentUser;
-import com.hobbyboard.domain.account.dto.AccountDto;
+import com.hobbyboard.application.usacase.AccountZoneUsacase;
+import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.dto.Profile;
 import com.hobbyboard.domain.account.dto.nickname.NicknameForm;
 import com.hobbyboard.domain.account.dto.nickname.NicknameFormValidator;
 import com.hobbyboard.domain.account.dto.notification.Notifications;
 import com.hobbyboard.domain.account.dto.passwordForm.PasswordForm;
 import com.hobbyboard.domain.account.dto.passwordForm.PasswordFormValidator;
+import com.hobbyboard.domain.account.entity.AccountZone;
 import com.hobbyboard.domain.account.service.AccountService;
 import com.hobbyboard.domain.tag.dto.TagForm;
 import com.hobbyboard.domain.tag.entity.Tag;
 import com.hobbyboard.domain.tag.repository.TagRepository;
+import com.hobbyboard.domain.zone.dto.ZoneDto;
+import com.hobbyboard.domain.zone.dto.request.ZoneForm;
+import com.hobbyboard.domain.zone.entity.Zone;
+import com.hobbyboard.domain.zone.service.ZoneService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,10 +34,13 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.hobbyboard.application.controller.SettingsController.*;
 
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping(ROOT + SETTINGS)
 @Controller
@@ -37,7 +49,10 @@ public class SettingsController {
     private final PasswordFormValidator passwordFormValidator;
     private final NicknameFormValidator nicknameFormValidator;
     private final AccountService accountService;
+    private final ZoneService zoneService;
+    private final AccountZoneUsacase accountZoneUsacase;
     private final ModelMapper modelMapper;
+    private final ObjectMapper objectMapper;
     private final TagRepository tagRepository;
 
     static final String ROOT = "/";
@@ -47,6 +62,7 @@ public class SettingsController {
     static final String NOTIFICATIONS = "/notifications";
     static final String ACCOUNT = "/account";
     static final String TAGS = "/tags";
+    static final String ZONES = "/zones";
 
     @InitBinder("passwordForm")
     public void passwordBinder(WebDataBinder webDataBinder) {
@@ -58,11 +74,60 @@ public class SettingsController {
         webDataBinder.addValidators(nicknameFormValidator);
     }
 
+    @GetMapping(ZONES)
+    public String updateZones(
+            @CurrentUser AccountDto accountDto,
+            Model model
+    ) throws JsonProcessingException {
+
+        List<String> zoneList = zoneService.findAll().stream()
+                .map(Zone::toString)
+                .toList();
+
+        List<String> zones = accountService.getZones(accountDto);
+
+        model.addAttribute("zones", zones);
+        model.addAttribute("whitelist", objectMapper.writeValueAsString(zoneList));
+        return SETTINGS + ZONES;
+    }
+
+    @PostMapping(ZONES + "/add")
+    @ResponseBody
+    public ResponseEntity<Void> addZones(
+            @CurrentUser AccountDto accountDto,
+            @RequestBody ZoneForm zoneForm
+    ) {
+
+        accountZoneUsacase.addZone(accountDto, zoneForm);
+        return ResponseEntity.ok()
+                .build();
+    }
+
+    @PostMapping(ZONES + "/remove")
+    @ResponseBody
+    public ResponseEntity<Void> removeZones(
+            @CurrentUser AccountDto accountDto,
+            @RequestBody ZoneForm zoneForm
+    ) {
+
+        accountZoneUsacase.removeZone(accountDto, zoneForm);
+        return ResponseEntity.ok()
+                .build();
+    }
+
     @GetMapping(TAGS)
     public String updateTags(
             @CurrentUser AccountDto accountDto,
             Model model
-    ) {
+    ) throws JsonProcessingException {
+        System.out.println(accountDto.getId());
+        Set<String> tags = accountService.getTags(accountDto);
+        Set<String> allTags = tagRepository.findAll().stream()
+                .map(Tag::getTitle)
+                .collect(Collectors.toUnmodifiableSet());
+
+        model.addAttribute("whitelist", objectMapper.writeValueAsString(allTags));
+        model.addAttribute("tags", tags);
         model.addAttribute("account", accountDto);
         return SETTINGS + TAGS;
     }
@@ -76,9 +141,7 @@ public class SettingsController {
         String title = tagForm.getTagTitle();
 
         Tag tag = tagRepository.findByTitle(title)
-                .orElseGet(() -> tagRepository.save(Tag.builder()
-                        .title(tagForm.getTagTitle())
-                        .build()));
+                .orElseGet(() -> tagRepository.save(Tag.builder().title(tagForm.getTagTitle()).build()));
 
         accountService.addTag(accountDto, tag);
         return ResponseEntity.ok().build();
@@ -92,10 +155,9 @@ public class SettingsController {
     ) {
         String title = tagForm.getTagTitle();
 
-        Tag tag = tagRepository.findByTitle(title)
-                .orElseThrow(() -> new IllegalArgumentException("없는 태그"));
+        tagRepository.findByTitle(title)
+                     .ifPresent(tag -> accountService.removeTag(accountDto, tag));
 
-        accountService.removeTag(accountDto, tag);
         return ResponseEntity.ok().build();
     }
     @GetMapping(ACCOUNT)

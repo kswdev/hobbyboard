@@ -1,12 +1,11 @@
 package com.hobbyboard.controller;
 
-import com.hobbyboard.WithAccount;
+import com.hobbyboard.domain.account.repository.WithAccount;
 import com.hobbyboard.application.usacase.AccountMailUsacase;
-import com.hobbyboard.domain.account.dto.AccountDto;
+import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.account.repository.AccountRepository;
 import com.hobbyboard.domain.mail.service.MailService;
-import lombok.With;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

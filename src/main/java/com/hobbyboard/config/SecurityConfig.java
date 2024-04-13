@@ -1,6 +1,6 @@
 package com.hobbyboard.config;
 
-import com.hobbyboard.domain.account.dto.AccountDto;
+import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.account.service.AccountService;
@@ -86,11 +86,8 @@ public class SecurityConfig {
                     .findByEmailAndNickname(username)
                     .orElseThrow(() -> new NoSuchElementException("없는 아이디입니다."));
 
-            log.info("accountEntity : {}", account);
-
             AccountDto accountDto = AccountDto.fromAccount(account);
 
-            log.info("accountDto : {}", accountDto);
             return new UserAccount(accountDto);
         };
     }

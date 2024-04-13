@@ -1,7 +1,7 @@
-package com.hobbyboard.domain.account.dto;
+package com.hobbyboard.domain.account.dto.account;
 
+import com.hobbyboard.domain.account.dto.RoleType;
 import com.hobbyboard.domain.account.entity.Account;
-import com.hobbyboard.domain.account.entity.AccountTag;
 import lombok.*;
 
 import java.io.Serial;
@@ -26,8 +26,6 @@ public class AccountDto implements Serializable {
     private String password;
 
     private Set<RoleType> roleTypes = new HashSet<>();
-    private Set<AccountTag> accountTags = new HashSet<>();
-
     private boolean emailVerified;
     private LocalDateTime joinedAt;
     private String bio;
@@ -51,7 +49,6 @@ public class AccountDto implements Serializable {
                 .email(account.getEmail())
                 .nickname(account.getNickname())
                 .roleTypes(account.getRoleTypes())
-                .accountTags(account.getAccountTags())
                 .emailVerified(account.isEmailVerified())
                 .joinedAt(account.getJoinedAt())
                 .bio(account.getBio())

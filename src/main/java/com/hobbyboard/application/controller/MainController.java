@@ -1,7 +1,7 @@
 package com.hobbyboard.application.controller;
 
 import com.hobbyboard.annotation.CurrentUser;
-import com.hobbyboard.domain.account.dto.AccountDto;
+import com.hobbyboard.domain.account.dto.account.AccountDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

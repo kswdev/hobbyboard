@@ -2,7 +2,7 @@ package com.hobbyboard.application.controller;
 
 import com.hobbyboard.annotation.CurrentUser;
 import com.hobbyboard.application.usacase.AccountMailUsacase;
-import com.hobbyboard.domain.account.dto.AccountDto;
+import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpFormValidator;
 import com.hobbyboard.domain.account.entity.Account;

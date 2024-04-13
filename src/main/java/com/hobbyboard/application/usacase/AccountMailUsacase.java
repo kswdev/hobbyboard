@@ -1,6 +1,6 @@
 package com.hobbyboard.application.usacase;
 
-import com.hobbyboard.domain.account.dto.AccountDto;
+import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
 import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.account.service.AccountService;

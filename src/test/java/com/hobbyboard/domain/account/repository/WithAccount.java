@@ -1,4 +1,4 @@
-package com.hobbyboard;
+package com.hobbyboard.domain.account.repository;
 
 import com.hobbyboard.domain.account.dto.RoleType;
 import org.springframework.security.test.context.support.WithSecurityContext;

@@ -1,6 +1,6 @@
 package com.hobbyboard.domain.account.dto.security;
 
-import com.hobbyboard.domain.account.dto.AccountDto;
+import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.dto.RoleType;
 import lombok.Getter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

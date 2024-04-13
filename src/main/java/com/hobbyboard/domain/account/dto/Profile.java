@@ -1,5 +1,6 @@
 package com.hobbyboard.domain.account.dto;
 
+import com.hobbyboard.domain.account.dto.account.AccountDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

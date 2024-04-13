@@ -2,16 +2,27 @@ package com.hobbyboard.domain.account.repository;
 
 import com.hobbyboard.domain.account.entity.AccountTag;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Set;
 
 public interface AccountTagRepository extends JpaRepository<AccountTag, Long> {
     AccountTag findByTagId(Long id);
 
+    @Modifying
     @Query("delete from AccountTag at where at.tag.id = :tagId and at.account.id = :accountId")
     void deleteByAccountIdAndTagId(Long tagId, Long accountId);
 
     @Query("select at from AccountTag at where at.tag.id = :tagId and at.account.id = :accountId")
-    Optional<AccountTag> findByAccountIdAndTagId(Long accountId, Long ta);
+    Optional<AccountTag> findByAccountIdAndTagId(Long accountId, Long tagId);
+
+    Set<AccountTag> findByAccountId(Long id);
+
+    @Transactional
+    @Modifying
+    @Query("delete from AccountTag at where at.account.id = :id")
+    void deleteByAccountId(Long id);
 }

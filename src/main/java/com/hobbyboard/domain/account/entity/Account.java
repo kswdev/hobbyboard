@@ -31,6 +31,10 @@ public class Account {
     @Convert(converter = UserRoleConverter.class)
     private Set<RoleType> roleTypes = new HashSet<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private Set<AccountZone> zones = new HashSet<>();
+
     private boolean emailVerified;
     private LocalDateTime joinedAt;
     private String bio;
