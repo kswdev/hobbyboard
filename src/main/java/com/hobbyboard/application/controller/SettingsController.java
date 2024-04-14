@@ -3,6 +3,7 @@ package com.hobbyboard.application.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hobbyboard.annotation.CurrentUser;
+import com.hobbyboard.application.usacase.AccountTagUsacase;
 import com.hobbyboard.application.usacase.AccountZoneUsacase;
 import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.dto.Profile;
@@ -16,6 +17,7 @@ import com.hobbyboard.domain.account.service.AccountService;
 import com.hobbyboard.domain.tag.dto.TagForm;
 import com.hobbyboard.domain.tag.entity.Tag;
 import com.hobbyboard.domain.tag.repository.TagRepository;
+import com.hobbyboard.domain.tag.service.TagService;
 import com.hobbyboard.domain.zone.dto.ZoneDto;
 import com.hobbyboard.domain.zone.dto.request.ZoneForm;
 import com.hobbyboard.domain.zone.entity.Zone;
@@ -51,9 +53,10 @@ public class SettingsController {
     private final AccountService accountService;
     private final ZoneService zoneService;
     private final AccountZoneUsacase accountZoneUsacase;
+    private final AccountTagUsacase accountTagUsacase;
+    private final TagService tagService;
     private final ModelMapper modelMapper;
     private final ObjectMapper objectMapper;
-    private final TagRepository tagRepository;
 
     static final String ROOT = "/";
     static final String SETTINGS = "settings";
@@ -97,10 +100,8 @@ public class SettingsController {
             @CurrentUser AccountDto accountDto,
             @RequestBody ZoneForm zoneForm
     ) {
-
         accountZoneUsacase.addZone(accountDto, zoneForm);
-        return ResponseEntity.ok()
-                .build();
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(ZONES + "/remove")
@@ -109,10 +110,8 @@ public class SettingsController {
             @CurrentUser AccountDto accountDto,
             @RequestBody ZoneForm zoneForm
     ) {
-
         accountZoneUsacase.removeZone(accountDto, zoneForm);
-        return ResponseEntity.ok()
-                .build();
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(TAGS)
@@ -120,9 +119,9 @@ public class SettingsController {
             @CurrentUser AccountDto accountDto,
             Model model
     ) throws JsonProcessingException {
-        System.out.println(accountDto.getId());
+
         Set<String> tags = accountService.getTags(accountDto);
-        Set<String> allTags = tagRepository.findAll().stream()
+        Set<String> allTags = tagService.findAll().stream()
                 .map(Tag::getTitle)
                 .collect(Collectors.toUnmodifiableSet());
 
@@ -138,12 +137,7 @@ public class SettingsController {
             @CurrentUser AccountDto accountDto,
             @RequestBody TagForm tagForm
     ) {
-        String title = tagForm.getTagTitle();
-
-        Tag tag = tagRepository.findByTitle(title)
-                .orElseGet(() -> tagRepository.save(Tag.builder().title(tagForm.getTagTitle()).build()));
-
-        accountService.addTag(accountDto, tag);
+        accountTagUsacase.addTag(accountDto, tagForm);
         return ResponseEntity.ok().build();
     }
 
@@ -153,13 +147,10 @@ public class SettingsController {
             @CurrentUser AccountDto accountDto,
             @RequestBody TagForm tagForm
     ) {
-        String title = tagForm.getTagTitle();
-
-        tagRepository.findByTitle(title)
-                     .ifPresent(tag -> accountService.removeTag(accountDto, tag));
-
+        accountTagUsacase.remove(accountDto, tagForm);
         return ResponseEntity.ok().build();
     }
+
     @GetMapping(ACCOUNT)
     public String updateAccountForm(
             @CurrentUser AccountDto accountDto,

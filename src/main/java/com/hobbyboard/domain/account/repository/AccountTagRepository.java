@@ -17,7 +17,7 @@ public interface AccountTagRepository extends JpaRepository<AccountTag, Long> {
     void deleteByAccountIdAndTagId(Long tagId, Long accountId);
 
     @Query("select at from AccountTag at where at.tag.id = :tagId and at.account.id = :accountId")
-    Optional<AccountTag> findByAccountIdAndTagId(Long accountId, Long tagId);
+    AccountTag findByAccountIdAndTagId(Long accountId, Long tagId);
 
     Set<AccountTag> findByAccountId(Long id);
 

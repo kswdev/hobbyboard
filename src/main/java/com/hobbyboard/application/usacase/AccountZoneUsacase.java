@@ -8,9 +8,9 @@ import com.hobbyboard.domain.zone.dto.request.ZoneForm;
 import com.hobbyboard.domain.zone.entity.Zone;
 import com.hobbyboard.domain.zone.service.ZoneService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 @RequiredArgsConstructor
 @Component
@@ -32,10 +32,14 @@ public class AccountZoneUsacase {
         account.getZones().add(accountZone);
     }
 
+    @Transactional
     public void removeZone(AccountDto accountDto, ZoneForm zoneForm) {
         Account account = accountService.findById(accountDto.getId());
         Zone zone = zoneService.findByCityAndProvince(zoneForm.getCityName(), zoneForm.getProvinceName());
 
-        accountService.deleteByAccountIdAndZoneId(account.getId(), zone.getId());
+        AccountZone accountZone = accountService.findByAccountIdAndZoneId(account.getId(), zone.getId());
+
+        if (!ObjectUtils.isEmpty(accountZone))
+            account.getZones().remove(accountZone);
     }
 }

@@ -1,15 +1,17 @@
 package com.hobbyboard.application.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hobbyboard.application.usacase.AccountTagUsacase;
 import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.entity.Account;
+import com.hobbyboard.domain.account.entity.AccountTag;
 import com.hobbyboard.domain.account.repository.AccountRepository;
 import com.hobbyboard.domain.account.repository.AccountTagRepository;
 import com.hobbyboard.domain.account.repository.WithAccount;
 import com.hobbyboard.domain.account.service.AccountService;
 import com.hobbyboard.domain.tag.dto.TagForm;
 import com.hobbyboard.domain.tag.entity.Tag;
-import com.hobbyboard.domain.tag.repository.TagRepository;
+import com.hobbyboard.domain.tag.service.TagService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,8 +21,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static com.hobbyboard.application.controller.SettingsController.*;
@@ -39,15 +41,17 @@ class SettingsControllerTest {
 
     @Autowired
     AccountService accountService;
+    @Autowired
+    AccountTagUsacase accountTagUsacase;
+
+    @Autowired
+    TagService tagService;
 
     @Autowired
     AccountRepository accountRepository;
 
     @Autowired
     AccountTagRepository accountTagRepository;
-
-    @Autowired
-    TagRepository tagRepository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -102,14 +106,12 @@ class SettingsControllerTest {
     @Test
     void removeTags() throws Exception {
 
-        AccountDto account = AccountDto.fromAccount(
-                accountService.findByNickname("nickname"));
-
-        Optional<Tag> newTag = tagRepository.findByTitle("newTag");
-        newTag.ifPresent(tag -> accountService.addTag(account, tag));
+        Account account = accountService.findByNickname("nickname");
 
         TagForm tagForm = new TagForm();
         tagForm.setTagTitle("newTag");
+
+        accountTagUsacase.addTag(AccountDto.fromAccount(account), tagForm);
 
         mockMvc.perform(post(ROOT + SETTINGS + TAGS + "/remove")
                         .contentType(MediaType.APPLICATION_JSON)

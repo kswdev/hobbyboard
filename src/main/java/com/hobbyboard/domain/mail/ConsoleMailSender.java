@@ -11,8 +11,13 @@ import org.springframework.stereotype.Component;
 import java.io.InputStream;
 @Component
 @Slf4j
-@Profile("local")
+@Profile({"local", "dev"})
 public class ConsoleMailSender implements JavaMailSender {
+
+    public ConsoleMailSender() {
+        System.out.println("@@@@@@@@@@@@@@@@@@@@");
+    }
+
     @Override
     public MimeMessage createMimeMessage() {
         return null;

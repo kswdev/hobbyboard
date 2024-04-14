@@ -1,0 +1,29 @@
+spring:
+  application.name: hobbyboard
+  devtools.livereload.port: 35730
+  datasource:
+    url: jdbc:postgresql://localhost:5432/testdb
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    defer-datasource-initialization: true
+    hibernate.ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+      hibernate.default_batch_fetch_size: 100
+    open-in-view:
+
+  h2.console.enabled: false
+  sql.init.mode: always
+  #redis
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+  session:
+    redis:
+      namespace: spring:session

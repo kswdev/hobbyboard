@@ -145,25 +145,13 @@ public class AccountService {
     }
 
     @Transactional
-    public void addTag(AccountDto accountDto, Tag tag) {
-        AccountTag accountTag = AccountTag.builder()
-                .account(modelMapper.map(accountDto, Account.class))
-                .tag(tag)
-                .build();
-
-        accountTagRepository.findByAccountIdAndTagId(accountDto.getId(), tag.getId())
-                .orElseGet(() -> accountTagRepository.save(accountTag));
-    }
-
-    @Transactional
     public void removeTag(AccountDto accountDto, Tag tag) {
         accountTagRepository.
                 deleteByAccountIdAndTagId(tag.getId(), accountDto.getId());
     }
 
     public Account findById(Long id) {
-        return accountRepository.findById(id)
-                .orElseGet(Account::new);
+        return accountRepository.findById(id).get();
     }
 
     public Set<String> getTags(AccountDto accountDto) {
@@ -180,7 +168,15 @@ public class AccountService {
                 .toList();
     }
 
+    public AccountZone findByAccountIdAndZoneId(Long accountId, Long zoneId) {
+        return accountZoneRepository.findByAccountIdAndZoneId(accountId, zoneId);
+    }
+
     public void deleteByAccountIdAndZoneId(Long accountId, Long zoneId) {
         accountZoneRepository.deleteByAccountIdAndZoneId(accountId, zoneId);
+    }
+
+    public AccountTag findByAccountIdAndTagId(Long accountId, Long tagId) {
+        return accountTagRepository.findByAccountIdAndTagId(accountId, tagId);
     }
 }

@@ -3,6 +3,7 @@ package com.hobbyboard.domain.account.entity;
 
 import com.hobbyboard.domain.account.converter.UserRoleConverter;
 import com.hobbyboard.domain.account.dto.RoleType;
+import com.hobbyboard.domain.study.entity.StudyAccount;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,7 +33,7 @@ public class Account {
     private Set<RoleType> roleTypes = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private Set<AccountZone> zones = new HashSet<>();
 
     private boolean emailVerified;
@@ -52,8 +53,9 @@ public class Account {
     private boolean studyUpdatedByWeb;
     private boolean studyUpdatedByEmail;
 
-    @OneToMany(mappedBy = "account")
-    private Set<AccountTag> accountTags;
+    @Builder.Default
+    @OneToMany(mappedBy = "account", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private Set<AccountTag> accountTags = new HashSet<>();
 
     public void completeSignUp() {
         this.setEmailVerified(true);

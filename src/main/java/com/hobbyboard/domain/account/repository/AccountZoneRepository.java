@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface AccountZoneRepository extends JpaRepository<AccountZone, Long> {
+    AccountZone findByAccountIdAndZoneId(Long accountId, Long zoneId);
 
     @Modifying
     @Query("delete from AccountZone az where az.account.id = :accountId and az.zone.id = :zoneId")
