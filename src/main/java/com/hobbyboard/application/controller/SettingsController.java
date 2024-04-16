@@ -12,13 +12,11 @@ import com.hobbyboard.domain.account.dto.nickname.NicknameFormValidator;
 import com.hobbyboard.domain.account.dto.notification.Notifications;
 import com.hobbyboard.domain.account.dto.passwordForm.PasswordForm;
 import com.hobbyboard.domain.account.dto.passwordForm.PasswordFormValidator;
-import com.hobbyboard.domain.account.entity.AccountZone;
-import com.hobbyboard.domain.account.service.AccountService;
+import com.hobbyboard.domain.account.service.AccountReadService;
+import com.hobbyboard.domain.account.service.AccountWriteService;
 import com.hobbyboard.domain.tag.dto.TagForm;
 import com.hobbyboard.domain.tag.entity.Tag;
-import com.hobbyboard.domain.tag.repository.TagRepository;
 import com.hobbyboard.domain.tag.service.TagService;
-import com.hobbyboard.domain.zone.dto.ZoneDto;
 import com.hobbyboard.domain.zone.dto.request.ZoneForm;
 import com.hobbyboard.domain.zone.entity.Zone;
 import com.hobbyboard.domain.zone.service.ZoneService;
@@ -50,7 +48,8 @@ public class SettingsController {
 
     private final PasswordFormValidator passwordFormValidator;
     private final NicknameFormValidator nicknameFormValidator;
-    private final AccountService accountService;
+    private final AccountWriteService accountWriteService;
+    private final AccountReadService accountReadService;
     private final ZoneService zoneService;
     private final AccountZoneUsacase accountZoneUsacase;
     private final AccountTagUsacase accountTagUsacase;
@@ -87,7 +86,7 @@ public class SettingsController {
                 .map(Zone::toString)
                 .toList();
 
-        List<String> zones = accountService.getZones(accountDto);
+        List<String> zones = accountReadService.getZones(accountDto);
 
         model.addAttribute("zones", zones);
         model.addAttribute("whitelist", objectMapper.writeValueAsString(zoneList));
@@ -120,7 +119,7 @@ public class SettingsController {
             Model model
     ) throws JsonProcessingException {
 
-        Set<String> tags = accountService.getTags(accountDto);
+        Set<String> tags = accountReadService.getTags(accountDto);
         Set<String> allTags = tagService.findAll().stream()
                 .map(Tag::getTitle)
                 .collect(Collectors.toUnmodifiableSet());
@@ -176,8 +175,8 @@ public class SettingsController {
             return SETTINGS + ACCOUNT;
         }
 
-        AccountDto account = accountService.updateNickname(accountDto, nicknameForm);
-        accountService.updateAuthentication(account, request, response);
+        AccountDto account = accountWriteService.updateNickname(accountDto, nicknameForm);
+        accountWriteService.updateAuthentication(account, request, response);
 
         attributes.addFlashAttribute("message", "닉네임시 수정되었습니다.");
 
@@ -203,8 +202,8 @@ public class SettingsController {
             HttpServletResponse response
     ) {
 
-        AccountDto updatedAccount = accountService.updateNotification(accountDto, notifications);
-        accountService.updateAuthentication(updatedAccount, request, response);
+        AccountDto updatedAccount = accountWriteService.updateNotification(accountDto, notifications);
+        accountWriteService.updateAuthentication(updatedAccount, request, response);
         attributes.addFlashAttribute(notifications);
         attributes.addFlashAttribute("message", "수정이 완료되었습니다.");
         return "redirect:/" + SETTINGS + NOTIFICATIONS;
@@ -235,9 +234,9 @@ public class SettingsController {
             return SETTINGS + PROFILE;
         }
 
-        AccountDto updatedAccountDto = accountService.updateProfile(accountDto, profile);
+        AccountDto updatedAccountDto = accountWriteService.updateProfile(accountDto, profile);
 
-        accountService.updateAuthentication(updatedAccountDto, request, response);
+        accountWriteService.updateAuthentication(updatedAccountDto, request, response);
 
         attributes.addFlashAttribute("message", "프로필을 수정했습니다.");
         return "redirect:/" + SETTINGS + PROFILE;
@@ -268,8 +267,8 @@ public class SettingsController {
             return SETTINGS + PASSWORD;
         }
 
-        AccountDto updatePassword = accountService.updatePassword(accountDto, passwordForm);
-        accountService.updateAuthentication(updatePassword, request, response);
+        AccountDto updatePassword = accountWriteService.updatePassword(accountDto, passwordForm);
+        accountWriteService.updateAuthentication(updatePassword, request, response);
 
         attributes.addFlashAttribute("message", "비밀번호를 수정했습니다.");
         return "redirect:/" + SETTINGS + PASSWORD;

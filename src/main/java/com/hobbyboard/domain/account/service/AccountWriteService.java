@@ -8,13 +8,7 @@ import com.hobbyboard.domain.account.dto.passwordForm.PasswordForm;
 import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
 import com.hobbyboard.domain.account.entity.Account;
-import com.hobbyboard.domain.account.entity.AccountTag;
-import com.hobbyboard.domain.account.entity.AccountZone;
 import com.hobbyboard.domain.account.repository.AccountRepository;
-import com.hobbyboard.domain.account.repository.AccountTagRepository;
-import com.hobbyboard.domain.account.repository.AccountZoneRepository;
-import com.hobbyboard.domain.tag.entity.Tag;
-import com.hobbyboard.domain.zone.entity.Zone;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,29 +18,22 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
-@RequiredArgsConstructor
-@Transactional
 @Service
-public class AccountService {
+@Transactional
+@RequiredArgsConstructor
+public class AccountWriteService {
 
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final AccountRepository accountRepository;
-    private final AccountTagRepository accountTagRepository;
-    private final AccountZoneRepository accountZoneRepository;
     private final SecurityContextHolderStrategy securityContextHolderStrategy;
     private final SecurityContextRepository securityContextRepository;
 
@@ -54,19 +41,6 @@ public class AccountService {
 
         Account saveAccount = toAccount(signUpForm);
         return accountRepository.save(saveAccount);
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<Account> findByEmailAndNickname(String emailOrNickname) {
-        Account account = accountRepository.findByEmail(emailOrNickname);
-
-        if (account == null)
-            account = accountRepository.findByNickname(emailOrNickname);
-
-        if (account == null)
-            throw new UsernameNotFoundException(emailOrNickname);
-
-        return Optional.of(account);
     }
 
     private Account toAccount(SignUpForm signUpForm) {
@@ -95,15 +69,9 @@ public class AccountService {
         accountRepository.save(findAccount);
     }
 
-    @Transactional(readOnly = true)
-    public Account findByNickname(String nickname) {
-        return accountRepository.findByNickname(nickname);
-    }
-
     public void completeSignUp(Account findAccount) {
         findAccount.completeSignUp();
     }
-
 
     public AccountDto updateProfile(AccountDto accountDto, Profile profile) {
 
@@ -137,46 +105,7 @@ public class AccountService {
         return AccountDto.fromAccount(account);
     }
 
-    public AccountDto findByEmail(String email) {
-        return Optional.ofNullable(accountRepository.findByEmail(email))
-                .map(AccountDto::fromAccount)
-                .orElseThrow(() -> new IllegalArgumentException("email"));
-
-    }
-
-    @Transactional
-    public void removeTag(AccountDto accountDto, Tag tag) {
-        accountTagRepository.
-                deleteByAccountIdAndTagId(tag.getId(), accountDto.getId());
-    }
-
     public Account findById(Long id) {
         return accountRepository.findById(id).get();
-    }
-
-    public Set<String> getTags(AccountDto accountDto) {
-        return accountTagRepository.findByAccountId(accountDto.getId()).stream()
-                .map(AccountTag::getTag)
-                .map(Tag::getTitle)
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
-    public List<String> getZones(AccountDto accountDto) {
-        return this.findById(accountDto.getId()).getZones().stream()
-                .map(AccountZone::getZone)
-                .map(Zone::toString)
-                .toList();
-    }
-
-    public AccountZone findByAccountIdAndZoneId(Long accountId, Long zoneId) {
-        return accountZoneRepository.findByAccountIdAndZoneId(accountId, zoneId);
-    }
-
-    public void deleteByAccountIdAndZoneId(Long accountId, Long zoneId) {
-        accountZoneRepository.deleteByAccountIdAndZoneId(accountId, zoneId);
-    }
-
-    public AccountTag findByAccountIdAndTagId(Long accountId, Long tagId) {
-        return accountTagRepository.findByAccountIdAndTagId(accountId, tagId);
     }
 }

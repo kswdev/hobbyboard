@@ -6,7 +6,8 @@ import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpFormValidator;
 import com.hobbyboard.domain.account.entity.Account;
-import com.hobbyboard.domain.account.service.AccountService;
+import com.hobbyboard.domain.account.service.AccountReadService;
+import com.hobbyboard.domain.account.service.AccountWriteService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -28,7 +29,8 @@ import java.security.Principal;
 @SessionAttributes("signUpForm")
 public class AccountController {
 
-    private final AccountService accountService;
+    private final AccountWriteService accountWriteService;
+    private final AccountReadService accountReadService;
     private final SignUpFormValidator signUpFormValidator;
     private final AccountMailUsacase accountMailUsacase;
 
@@ -48,7 +50,7 @@ public class AccountController {
             RedirectAttributes attributes,
             Model model
     ) {
-        AccountDto account = accountService.findByEmail(email);
+        AccountDto account = accountReadService.findByEmail(email);
 
         if (account == null) {
             model.addAttribute("error", "wrong.email");
@@ -114,7 +116,7 @@ public class AccountController {
         AccountDto account = AccountDto.fromAccount(
                 accountMailUsacase.saveSignUpAndSendConfirmEmail(signUpForm));
 
-        accountService.updateAuthentication(account, request, response);
+        accountWriteService.updateAuthentication(account, request, response);
 
         status.setComplete();
 
@@ -155,7 +157,7 @@ public class AccountController {
             Model model
     ) {
         AccountDto byNickname = AccountDto.fromAccount(
-                accountService.findByNickname(nickname));
+                accountReadService.findByNickname(nickname));
 
         if (byNickname == null)
             throw new IllegalArgumentException(nickname + " 에 해당하는 사용자가 없습니다.");

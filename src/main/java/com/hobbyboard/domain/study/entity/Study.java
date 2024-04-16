@@ -16,11 +16,13 @@ public class Study {
     @Id @GeneratedValue
     private Long id;
 
+    @Builder.Default
     @OneToMany(mappedBy = "study")
-    private Set<StudyAccount> managers;
+    private Set<StudyAccount> managers = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "study")
-    private Set<StudyAccount> members;
+    private Set<StudyAccount> members = new HashSet<>();
 
     @Column(unique = true)
     private String path;

@@ -4,13 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hobbyboard.application.usacase.AccountTagUsacase;
 import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.entity.Account;
-import com.hobbyboard.domain.account.entity.AccountTag;
 import com.hobbyboard.domain.account.repository.AccountRepository;
 import com.hobbyboard.domain.account.repository.AccountTagRepository;
 import com.hobbyboard.domain.account.repository.WithAccount;
-import com.hobbyboard.domain.account.service.AccountService;
+import com.hobbyboard.domain.account.service.AccountReadService;
+import com.hobbyboard.domain.account.service.AccountWriteService;
 import com.hobbyboard.domain.tag.dto.TagForm;
-import com.hobbyboard.domain.tag.entity.Tag;
 import com.hobbyboard.domain.tag.service.TagService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -40,7 +38,9 @@ class SettingsControllerTest {
     MockMvc mockMvc;
 
     @Autowired
-    AccountService accountService;
+    AccountWriteService accountWriteService;
+    @Autowired
+    AccountReadService accountReadService;
     @Autowired
     AccountTagUsacase accountTagUsacase;
 
@@ -96,8 +96,8 @@ class SettingsControllerTest {
                 .with(csrf()))
                 .andExpect(status().isOk());
 
-        AccountDto accountDto = accountService.findByEmail("email@naver.com");
-        Set<String> tags = accountService.getTags(accountDto);
+        AccountDto accountDto = accountReadService.findByEmail("email@naver.com");
+        Set<String> tags = accountReadService.getTags(accountDto);
         assertTrue(tags.contains("newTag"));
     }
 
@@ -106,7 +106,7 @@ class SettingsControllerTest {
     @Test
     void removeTags() throws Exception {
 
-        Account account = accountService.findByNickname("nickname");
+        Account account = accountReadService.findByNickname("nickname");
 
         TagForm tagForm = new TagForm();
         tagForm.setTagTitle("newTag");
@@ -119,8 +119,8 @@ class SettingsControllerTest {
                         .with(csrf()))
                 .andExpect(status().isOk());
 
-        AccountDto accountDto = accountService.findByEmail("email@naver.com");
-        Set<String> tags = accountService.getTags(accountDto);
+        AccountDto accountDto = accountReadService.findByEmail("email@naver.com");
+        Set<String> tags = accountReadService.getTags(accountDto);
         assertFalse(tags.contains("newTag"));
     }
 

@@ -3,7 +3,8 @@ package com.hobbyboard.application.usacase;
 import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.dto.signUpForm.SignUpForm;
 import com.hobbyboard.domain.account.entity.Account;
-import com.hobbyboard.domain.account.service.AccountService;
+import com.hobbyboard.domain.account.service.AccountReadService;
+import com.hobbyboard.domain.account.service.AccountWriteService;
 import com.hobbyboard.domain.mail.service.MailService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,20 +16,21 @@ import org.springframework.stereotype.Component;
 public class AccountMailUsacase {
 
     private final MailService mailService;
-    private final AccountService accountService;
+    private final AccountWriteService accountWriteService;
+    private final AccountReadService accountReadService;
 
     public void sendPasswordChangeEmail(String email) {
         mailService.sendPasswordChangeEmail(email);
     }
 
     public Account saveSignUpAndSendConfirmEmail(SignUpForm signUpForm) {
-        Account saveAccount = accountService.saveAccount(signUpForm);
+        Account saveAccount = accountWriteService.saveAccount(signUpForm);
         mailService.sendSignUpConfirmEmail(saveAccount);
 
         return saveAccount;
     }
     public Account resendConfirmEmail(String nickname) {
-        Account account = accountService.findByNickname(nickname);
+        Account account = accountReadService.findByNickname(nickname);
 
         if (account == null)
             throw new IllegalArgumentException(nickname + "은 없는 닉네임입니다.");
@@ -40,12 +42,12 @@ public class AccountMailUsacase {
 
     public Account confirmEmailProcess(String email, String token) {
 
-        Account findAccount = accountService.findByEmailAndNickname(email)
+        Account findAccount = accountReadService.findByEmailAndNickname(email)
                 .orElseThrow(() -> new IllegalArgumentException("email"));
 
         if (mailService.isValidToken(findAccount.getEmail(), token)) {
-            accountService.completeSignUp(findAccount);
-            accountService.save(findAccount);
+            accountWriteService.completeSignUp(findAccount);
+            accountWriteService.save(findAccount);
         } else
             throw new IllegalArgumentException("token");
 
@@ -59,10 +61,10 @@ public class AccountMailUsacase {
             HttpServletResponse response
     ) {
 
-        AccountDto findAccount = accountService.findByEmail(email);
+        AccountDto findAccount = accountReadService.findByEmail(email);
 
         if (mailService.isValidToken(email, token))
-            accountService.updateAuthentication(findAccount, request, response);
+            accountWriteService.updateAuthentication(findAccount, request, response);
         else
             throw new IllegalArgumentException("token");
     }

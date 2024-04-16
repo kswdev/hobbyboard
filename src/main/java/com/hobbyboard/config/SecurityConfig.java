@@ -3,7 +3,7 @@ package com.hobbyboard.config;
 import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.account.entity.Account;
-import com.hobbyboard.domain.account.service.AccountService;
+import com.hobbyboard.domain.account.service.AccountReadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -35,7 +35,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            AccountService accountService,
+            AccountReadService accountReadService,
             ModelMapper modelMapper,
             HttpSecurity http
     ) throws Exception {
@@ -62,7 +62,7 @@ public class SecurityConfig {
                         logout -> logout.logoutSuccessUrl("/"))
                 .rememberMe(
                         config -> config
-                                .userDetailsService(userDetailsService(accountService, modelMapper))
+                                .userDetailsService(userDetailsService(accountReadService, modelMapper))
                                 .tokenRepository(tokenRepository()))
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
@@ -78,11 +78,11 @@ public class SecurityConfig {
     }
     @Bean
     public UserDetailsService userDetailsService(
-            AccountService accountService,
+            AccountReadService accountReadService,
             ModelMapper modelMapper
     ) {
         return username -> {
-            Account account = accountService
+            Account account = accountReadService
                     .findByEmailAndNickname(username)
                     .orElseThrow(() -> new NoSuchElementException("없는 아이디입니다."));
 
