@@ -6,6 +6,7 @@ import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.study.dto.StudyForm;
 import com.hobbyboard.domain.study.dto.StudyFormValidator;
 import com.hobbyboard.domain.study.entity.Study;
+import com.hobbyboard.domain.study.service.StudyReadService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.net.URLEncoder;
@@ -25,6 +27,7 @@ public class StudyController {
 
     private final StudyAccountUsacase studyAccountUsacase;
     private final StudyFormValidator studyFormValidator;
+    private final StudyReadService studyReadService;
 
     @InitBinder("studyForm")
     public void initBinder(WebDataBinder webDataBinder) {
@@ -55,5 +58,16 @@ public class StudyController {
 
         Study study = studyAccountUsacase.createNewStudy(studyForm, accountDto);
         return "redirect:/study/" + URLEncoder.encode(study.getPath(), StandardCharsets.UTF_8);
+    }
+
+    @GetMapping("/study/{path}")
+    public String viewStudy(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path,
+            Model model
+    ) {
+        model.addAttribute("account", accountDto);
+        model.addAttribute("study", studyAccountUsacase.findByPath(path));
+        return "study/view";
     }
 }

@@ -1,12 +1,15 @@
 package com.hobbyboard.domain.study.entity;
 
+import com.hobbyboard.domain.account.dto.account.AccountDto;
+import com.hobbyboard.domain.account.dto.security.UserAccount;
+import com.hobbyboard.domain.account.entity.Account;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
@@ -17,12 +20,8 @@ public class Study {
     private Long id;
 
     @Builder.Default
-    @OneToMany(mappedBy = "study")
-    private Set<StudyAccount> managers = new HashSet<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "study")
-    private Set<StudyAccount> members = new HashSet<>();
+    @OneToMany(fetch = FetchType.EAGER)
+    private Set<StudyAccount> studyAccounts = new HashSet<>();
 
     @Column(unique = true)
     private String path;
@@ -51,4 +50,24 @@ public class Study {
     private boolean published;
     private boolean closed;
     private boolean useBanner;
+
+    public Set<Account> getManagers() {
+        return studyAccounts.stream()
+                .filter(studyAccount -> studyAccount.getRole().equals(StudyAccount.Role.MANAGER))
+                .map(StudyAccount::getAccount)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    public Set<Account> getMembers() {
+        return studyAccounts.stream()
+                .filter(studyAccount -> studyAccount.getRole().equals(StudyAccount.Role.MEMBER))
+                .map(StudyAccount::getAccount)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    public void addManager(StudyAccount studyAccount) {
+        studyAccount.setRole(StudyAccount.Role.MANAGER);
+        studyAccount.setStudy(this);
+        getStudyAccounts().add(studyAccount);
+    }
 }

@@ -3,7 +3,6 @@ package com.hobbyboard.domain.account.entity;
 
 import com.hobbyboard.domain.account.converter.UserRoleConverter;
 import com.hobbyboard.domain.account.dto.RoleType;
-import com.hobbyboard.domain.study.entity.StudyAccount;
 import jakarta.persistence.*;
 import lombok.*;
 
