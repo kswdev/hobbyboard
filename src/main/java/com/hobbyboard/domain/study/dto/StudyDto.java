@@ -76,10 +76,13 @@ public class StudyDto implements Serializable {
     }
 
     public boolean isMember(UserAccount userAccount) {
+        System.out.println(members.contains(userAccount.getAccount()));
         return members.contains(userAccount.getAccount());
     }
 
     public boolean isManager(UserAccount userAccount) {
+        System.out.println(managers.size());
+        System.out.println(managers.contains(userAccount.getAccount()));
         return managers.contains(userAccount.getAccount());
     }
 }

@@ -1,7 +1,5 @@
 package com.hobbyboard.domain.study.entity;
 
-import com.hobbyboard.domain.account.dto.account.AccountDto;
-import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.account.entity.Account;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,6 +9,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@NamedEntityGraph(name = "Study.withAll", attributeNodes = {
+        @NamedAttributeNode("tags"),
+        @NamedAttributeNode("zones"),
+        @NamedAttributeNode("studyAccounts"),
+})
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
 @Builder @AllArgsConstructor @NoArgsConstructor
@@ -20,7 +23,9 @@ public class Study {
     private Long id;
 
     @Builder.Default
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "study",
+                cascade = CascadeType.PERSIST,
+          orphanRemoval = true)
     private Set<StudyAccount> studyAccounts = new HashSet<>();
 
     @Column(unique = true)

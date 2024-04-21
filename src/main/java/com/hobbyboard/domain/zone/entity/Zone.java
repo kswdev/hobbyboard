@@ -20,7 +20,6 @@ public class Zone {
     @Column(nullable = false)
     private String localNameOfCity;
 
-    @Column(nullable = true)
     private String province;
 
     @Override

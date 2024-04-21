@@ -41,7 +41,6 @@ public class StudyAccountUsacase {
         return studyWriteService.save(study);
     }
 
-    @Transactional
     public StudyDto findByPath(String path) {
         Study study = studyReadService.findByPath(path);
         return StudyDto.from(study);

@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @NoArgsConstructor @AllArgsConstructor
-@Getter @Setter @Builder
+@Getter @Setter @Builder @EqualsAndHashCode(of = "id")
 public class AccountDto implements Serializable {
 
     @Serial

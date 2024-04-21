@@ -70,4 +70,17 @@ public class StudyController {
         model.addAttribute("study", studyAccountUsacase.findByPath(path));
         return "study/view";
     }
+
+    @GetMapping("/study/{path}/members")
+    public String viewStudyMembers(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path,
+            Model model
+    ) {
+        model.addAttribute("account", accountDto);
+        //TODO: 스터디에 속한 회원만 조회하므로 필요없는 EAGER FETCH 해제하기
+        model.addAttribute("study", studyAccountUsacase.findByPath(path));
+
+        return "study/members";
+    }
 }
