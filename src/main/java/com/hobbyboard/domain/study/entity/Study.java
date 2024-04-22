@@ -1,11 +1,13 @@
 package com.hobbyboard.domain.study.entity;
 
+import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.entity.Account;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -74,5 +76,14 @@ public class Study {
         studyAccount.setRole(StudyAccount.Role.MANAGER);
         studyAccount.setStudy(this);
         getStudyAccounts().add(studyAccount);
+    }
+
+    public boolean isManagerOf(AccountDto accountDto) {
+        long count = studyAccounts.stream()
+                .filter(studyAccount -> Objects.equals(studyAccount.getRole(), StudyAccount.Role.MANAGER))
+                .filter(studyAccount -> accountDto.getEmail().equals(studyAccount.getAccount().getEmail()))
+                .count();
+
+        return count > 0;
     }
 }

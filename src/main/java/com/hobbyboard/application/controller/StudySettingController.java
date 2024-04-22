@@ -32,13 +32,62 @@ public class StudySettingController {
     private final StudyAccountUsacase studyAccountUsacase;
     private final ModelMapper modelMapper;
 
+    @GetMapping("/banner")
+    public String viewStudyBanner(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path,
+            Model model
+    ) {
+        StudyDto studyDto   = StudyDto.from(studyAccountUsacase.getStudyToUpdate(accountDto, path));
+
+        model.addAttribute("account", accountDto);
+        model.addAttribute("study", studyDto);
+
+        return "study/settings/banner";
+    }
+
+    @PostMapping("/banner/enable")
+    public String bannerEnable(
+            @PathVariable String path,
+            RedirectAttributes attributes
+    ) {
+        studyWriteService.enableStudyBanner(path);
+        attributes.addFlashAttribute("message", "배너가 활성화되었습니다.");
+
+        return "redirect:/study/" + getEncode(path) + "/settings/banner";
+    }
+
+    @PostMapping("/banner/disable")
+    public String bannerDisable(
+            @PathVariable String path,
+            RedirectAttributes attributes
+    ) {
+        studyWriteService.disableStudyBanner(path);
+        attributes.addFlashAttribute("message", "배너가 비활성화되었습니다.");
+
+        return "redirect:/study/" + getEncode(path) + "/settings/banner";
+    }
+
+    @PostMapping("/banner")
+    public String updateBannerImage(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path,
+            String image,
+            RedirectAttributes attributes
+    ) {
+        studyAccountUsacase.updateStudyImage(accountDto, path, image);
+        attributes.addFlashAttribute("message", "스터디 이미지를 수정했습니다.");
+
+        return "redirect:/study/" + getEncode(path) + "/settings/banner";
+    }
+
     @GetMapping("/description")
     public String viewStudySetting(
             @CurrentUser AccountDto accountDto,
             @PathVariable String path,
             Model model
     ) {
-        StudyDto studyDto   = studyAccountUsacase.getStudyToUpdate(accountDto, path);
+        StudyDto studyDto   = StudyDto.from(studyAccountUsacase.getStudyToUpdate(accountDto, path));
         StudyForm studyForm = modelMapper.map(studyDto, StudyForm.class);
 
         model.addAttribute("account", accountDto);
@@ -63,12 +112,12 @@ public class StudySettingController {
             return "study/settings/description";
         }
 
-        Study updatedStudy = studyWriteService.updateStudyDescription(path, studyForm);
+        Study updatedStudy = studyWriteService.updateStudyDescription(studyForm);
         attributes.addFlashAttribute("message", "스터디 소개를 수정했습니다.");
-        return "redirect:/study/" + getEncode(updatedStudy) + "/settings/description";
+        return "redirect:/study/" + getEncode(updatedStudy.getPath()) + "/settings/description";
     }
 
-    private static String getEncode(Study updatedStudy) {
-        return URLEncoder.encode(updatedStudy.getPath(), StandardCharsets.UTF_8);
+    private static String getEncode(String path) {
+        return URLEncoder.encode(path, StandardCharsets.UTF_8);
     }
 }

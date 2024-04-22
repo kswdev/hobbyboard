@@ -15,6 +15,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+import java.util.Set;
 
 
 @Component
@@ -47,12 +49,13 @@ public class StudyAccountUsacase {
         return StudyDto.from(study);
     }
 
-    public StudyDto getStudyToUpdate(AccountDto accountDto, String path) {
-        StudyDto studyDto = StudyDto.from(this.getStudy(path));
-        if (!studyDto.isManagerOf(accountDto))
+    public Study getStudyToUpdate(AccountDto accountDto, String path) {
+        Study study = this.getStudy(path);
+
+        if (!study.isManagerOf(accountDto))
             throw new AccessDeniedException("해당 기능을 사용할 수 없습니다.");
 
-        return studyDto;
+        return study;
     }
 
     private Study getStudy(String path) {
@@ -61,5 +64,11 @@ public class StudyAccountUsacase {
             throw new IllegalArgumentException(path + "에 해당하는 스터디가 없습니다.");
 
         return study;
+    }
+
+    @Transactional
+    public void updateStudyImage(AccountDto accountDto, String path, String image) {
+        Study study = this.getStudyToUpdate(accountDto, path);
+        study.setImage(image);
     }
 }

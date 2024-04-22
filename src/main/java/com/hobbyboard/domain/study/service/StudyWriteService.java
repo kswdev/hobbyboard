@@ -12,6 +12,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -28,10 +30,23 @@ public class StudyWriteService {
         return studyRepository.save(study);
     }
 
-    public Study updateStudyDescription(String path, StudyDescriptionForm studyForm) {
+    public Study updateStudyDescription(StudyDescriptionForm studyForm) {
 
-        Study study = studyRepository.findByPath(path);
+        Study study = studyRepository.findById(studyForm.getStudyDescriptionId())
+                .orElseThrow(IllegalArgumentException::new);
+
         modelMapper.map(studyForm, study);
+
         return study;
+    }
+
+    public void enableStudyBanner(String path) {
+        Study byPath = studyRepository.findByPath(path);
+        byPath.setUseBanner(true);
+    }
+
+    public void disableStudyBanner(String path) {
+        Study byPath = studyRepository.findByPath(path);
+        byPath.setUseBanner(false);
     }
 }
