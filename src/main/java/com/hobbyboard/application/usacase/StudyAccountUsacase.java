@@ -11,10 +11,11 @@ import com.hobbyboard.domain.study.service.StudyReadService;
 import com.hobbyboard.domain.study.service.StudyWriteService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.stream.Collectors;
+
 
 @Component
 @RequiredArgsConstructor
@@ -44,5 +45,21 @@ public class StudyAccountUsacase {
     public StudyDto findByPath(String path) {
         Study study = studyReadService.findByPath(path);
         return StudyDto.from(study);
+    }
+
+    public StudyDto getStudyToUpdate(AccountDto accountDto, String path) {
+        StudyDto studyDto = StudyDto.from(this.getStudy(path));
+        if (!studyDto.isManagerOf(accountDto))
+            throw new AccessDeniedException("해당 기능을 사용할 수 없습니다.");
+
+        return studyDto;
+    }
+
+    private Study getStudy(String path) {
+        Study study = studyReadService.findByPath(path);
+        if (study == null)
+            throw new IllegalArgumentException(path + "에 해당하는 스터디가 없습니다.");
+
+        return study;
     }
 }

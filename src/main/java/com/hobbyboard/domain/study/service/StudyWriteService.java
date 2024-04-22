@@ -1,10 +1,14 @@
 package com.hobbyboard.domain.study.service;
 
+import com.hobbyboard.domain.study.dto.StudyDescriptionForm;
+import com.hobbyboard.domain.study.dto.StudyForm;
 import com.hobbyboard.domain.study.entity.Study;
 import com.hobbyboard.domain.study.entity.StudyAccount;
 import com.hobbyboard.domain.study.repository.StudyAccountRepository;
 import com.hobbyboard.domain.study.repository.StudyRepository;
+import jakarta.persistence.Id;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class StudyWriteService {
     private final StudyAccountRepository studyAccountRepository;
     private final StudyRepository studyRepository;
+    private final ModelMapper modelMapper;
 
     public void save(StudyAccount newStudyAccount) {
         studyAccountRepository.save(newStudyAccount);
@@ -21,5 +26,12 @@ public class StudyWriteService {
 
     public Study save(Study study) {
         return studyRepository.save(study);
+    }
+
+    public Study updateStudyDescription(String path, StudyDescriptionForm studyForm) {
+
+        Study study = studyRepository.findByPath(path);
+        modelMapper.map(studyForm, study);
+        return study;
     }
 }
