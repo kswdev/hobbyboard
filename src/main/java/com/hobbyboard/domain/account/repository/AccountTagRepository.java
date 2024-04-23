@@ -10,11 +10,6 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface AccountTagRepository extends JpaRepository<AccountTag, Long> {
-    AccountTag findByTagId(Long id);
-
-    @Modifying
-    @Query("delete from AccountTag at where at.tag.id = :tagId and at.account.id = :accountId")
-    void deleteByAccountIdAndTagId(Long tagId, Long accountId);
 
     @Query("select at from AccountTag at where at.tag.id = :tagId and at.account.id = :accountId")
     AccountTag findByAccountIdAndTagId(Long accountId, Long tagId);

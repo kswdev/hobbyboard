@@ -1,30 +1,24 @@
 package com.hobbyboard.domain.study.service;
 
 import com.hobbyboard.domain.study.dto.StudyDescriptionForm;
-import com.hobbyboard.domain.study.dto.StudyForm;
 import com.hobbyboard.domain.study.entity.Study;
 import com.hobbyboard.domain.study.entity.StudyAccount;
+import com.hobbyboard.domain.study.entity.StudyTag;
 import com.hobbyboard.domain.study.repository.StudyAccountRepository;
 import com.hobbyboard.domain.study.repository.StudyRepository;
-import jakarta.persistence.Id;
+import com.hobbyboard.domain.study.repository.StudyTagRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class StudyWriteService {
-    private final StudyAccountRepository studyAccountRepository;
+    private final StudyTagRepository studyTagRepository;
     private final StudyRepository studyRepository;
     private final ModelMapper modelMapper;
-
-    public void save(StudyAccount newStudyAccount) {
-        studyAccountRepository.save(newStudyAccount);
-    }
 
     public Study save(Study study) {
         return studyRepository.save(study);
@@ -48,5 +42,9 @@ public class StudyWriteService {
     public void disableStudyBanner(String path) {
         Study byPath = studyRepository.findByPath(path);
         byPath.setUseBanner(false);
+    }
+
+    public StudyTag findByStudyIdAndTagId(Long studyId, Long tagId) {
+        return studyTagRepository.findByStudyIdAndTagId(studyId, tagId);
     }
 }

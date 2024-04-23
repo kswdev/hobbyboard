@@ -259,7 +259,8 @@
 
 
 <div th:fragment="study-banner" th:if="${study.useBanner}" class="row" id="study-logo">
-    <img th:src="${study.image}"/>
+    <img th:if="${#strings.isEmpty(study.image)}" src="/images/logo_sm.png" />
+    <img th:if="${!#strings.isEmpty(study.image)}" th:src="${study.image}"/>
 </div>
 
 <div th:fragment="study-info">
@@ -317,8 +318,8 @@
             <p>
                 <span th:each="tag: ${study.tags}"
                       class="font-weight-light text-monospace badge badge-pill badge-info mr-3">
-                    <a th:href="@{'/search/tag/' + ${tag.title}}" class="text-decoration-none text-white">
-                        <i class="fa fa-tag"></i> <span th:text="${tag.title}">Tag</span>
+                    <a th:href="@{'/search/tag/' + ${tag}}" class="text-decoration-none text-white">
+                        <i class="fa fa-tag"></i> <span th:text="${tag}">Tag</span>
                     </a>
                 </span>
                 <span th:each="zone: ${study.zones}" class="font-weight-light text-monospace badge badge-primary mr-3">

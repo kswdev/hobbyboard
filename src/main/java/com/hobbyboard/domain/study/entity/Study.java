@@ -16,6 +16,14 @@ import java.util.stream.Collectors;
         @NamedAttributeNode("zones"),
         @NamedAttributeNode("studyAccounts"),
 })
+@NamedEntityGraph(name = "Study.withTagAndManager", attributeNodes = {
+        @NamedAttributeNode("tags"),
+        @NamedAttributeNode("studyAccounts"),
+})
+@NamedEntityGraph(name = "Study.withZoneAndManager", attributeNodes = {
+        @NamedAttributeNode("zones"),
+        @NamedAttributeNode("studyAccounts"),
+})
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
 @Builder @AllArgsConstructor @NoArgsConstructor
@@ -43,11 +51,11 @@ public class Study {
     private String image;
 
     @Builder.Default
-    @OneToMany(mappedBy = "study")
+    @OneToMany(mappedBy = "study", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private Set<StudyTag> tags = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "study")
+    @OneToMany(mappedBy = "study", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private Set<StudyZone> zones = new HashSet<>();
 
     private LocalDateTime publishedDateTime;
