@@ -24,8 +24,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Objects;
-import java.util.Set;
+import java.time.LocalDateTime;
 
 
 @Component
@@ -56,7 +55,7 @@ public class StudyAccountUsacase {
     }
 
     public StudyDto findByPath(String path) {
-        Study study = studyReadService.findByPath(path);
+        Study study = studyReadService.findWithAllByPath(path);
         return StudyDto.from(study);
     }
 
@@ -70,7 +69,7 @@ public class StudyAccountUsacase {
     }
 
     private Study getStudy(String path) {
-        Study study = studyReadService.findByPath(path);
+        Study study = studyReadService.findWithAllByPath(path);
         if (study == null)
             throw new IllegalArgumentException(path + "에 해당하는 스터디가 없습니다.");
 
@@ -130,5 +129,68 @@ public class StudyAccountUsacase {
 
         if (!ObjectUtils.isEmpty(studyZone))
             study.getZones().remove(studyZone);
+    }
+
+    @Transactional
+    public void startPublish(String path, AccountDto accountDto) {
+        Study study = studyReadService.findStudyWithByPath(path);
+
+        if (study.isManagerOf(accountDto)) {
+            study.publish();
+        }
+    }
+
+    @Transactional
+    public void closeStudy(String path, AccountDto accountDto) {
+        Study study = studyReadService.findStudyWithByPath(path);
+
+        if (study.isManagerOf(accountDto)) {
+            study.close();
+        }
+    }
+
+    @Transactional
+    public void startRecruit(String path, AccountDto accountDto) {
+        Study study = studyReadService.findStudyWithByPath(path);
+
+        if (study.isManagerOf(accountDto)) {
+            study.startRecruit();
+        }
+    }
+
+    @Transactional
+    public void stopRecruit(String path, AccountDto accountDto) {
+        Study study = studyReadService.findStudyWithByPath(path);
+
+        if (study.isManagerOf(accountDto)) {
+            study.setRecruiting(false);
+            study.setRecruitingUpdatedDateTime(LocalDateTime.now());
+        }
+    }
+
+    @Transactional
+    public StudyDto updateStudyPath(String path, String newPath, AccountDto accountDto) {
+        Study study = studyReadService.findStudyWithByPath(path);
+
+        if (study.isManagerOf(accountDto)) {
+            study.setPath(newPath);
+        }
+
+        return StudyDto.from(study);
+    }
+
+    @Transactional
+    public StudyDto updateStudyTitle(String path, String newTitle, AccountDto accountDto) {
+        Study study = studyReadService.findStudyWithByPath(path);
+
+        if (study.isManagerOf(accountDto)) {
+            study.setTitle(newTitle);
+        }
+
+        return StudyDto.from(study);
+    }
+
+    public void removeStudy(String path, AccountDto accountDto) {
+
     }
 }

@@ -15,15 +15,20 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
     boolean existsByPath(String path);
 
     @EntityGraph(value = "Study.withAll", type = EntityGraph.EntityGraphType.LOAD)
-    Study findByPath(String path);
+    Study findWithAllByPath(String path);
 
     @Query("select sz from StudyZone sz where sz.study.id = :studyId and sz.zone.id = :zoneId")
     StudyZone findByStudyIdAndZoneId(Long studyId, Long zoneId);
 
     @EntityGraph(value = "Study.withTagAndManager", type = EntityGraph.EntityGraphType.LOAD)
-    Study findAccountWithTagByPath(String path);
+    Study findStudyWithTagByPath(String path);
 
     @EntityGraph(value = "Study.withZoneAndManager", type = EntityGraph.EntityGraphType.LOAD)
-    Study findAccountWithZoneByPath(String path);
+    Study findStudyWithZoneByPath(String path);
+
+    Study findByPath(String path);
+
+    @EntityGraph(value = "Study.withAccount", type = EntityGraph.EntityGraphType.LOAD)
+    Study findStudyWithByPath(String path);
 }
 

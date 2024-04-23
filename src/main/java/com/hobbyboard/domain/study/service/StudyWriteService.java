@@ -2,9 +2,7 @@ package com.hobbyboard.domain.study.service;
 
 import com.hobbyboard.domain.study.dto.StudyDescriptionForm;
 import com.hobbyboard.domain.study.entity.Study;
-import com.hobbyboard.domain.study.entity.StudyAccount;
 import com.hobbyboard.domain.study.entity.StudyTag;
-import com.hobbyboard.domain.study.repository.StudyAccountRepository;
 import com.hobbyboard.domain.study.repository.StudyRepository;
 import com.hobbyboard.domain.study.repository.StudyTagRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,12 +33,12 @@ public class StudyWriteService {
     }
 
     public void enableStudyBanner(String path) {
-        Study byPath = studyRepository.findByPath(path);
+        Study byPath = studyRepository.findWithAllByPath(path);
         byPath.setUseBanner(true);
     }
 
     public void disableStudyBanner(String path) {
-        Study byPath = studyRepository.findByPath(path);
+        Study byPath = studyRepository.findWithAllByPath(path);
         byPath.setUseBanner(false);
     }
 

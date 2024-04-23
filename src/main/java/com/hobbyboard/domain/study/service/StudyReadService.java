@@ -14,23 +14,27 @@ public class StudyReadService {
 
     private final StudyRepository studyRepository;
 
-    public Study findByPath(String path) {
-        return studyRepository.findByPath(path);
+    public Study findWithAllByPath(String path) {
+        return studyRepository.findWithAllByPath(path);
     }
 
     public StudyZone findByStudyIdAndZoneId(Long studyId, Long zoneId) {
         return studyRepository.findByStudyIdAndZoneId(studyId, zoneId);
     }
 
-    public Study getStudyToUpdateTag(String path) {
+    public Study findByPath(String path) {
         return studyRepository.findByPath(path);
     }
 
     public Study findStudyToUpdateTag(String path) {
-        return studyRepository.findAccountWithTagByPath(path);
+        return studyRepository.findStudyWithTagByPath(path);
     }
 
     public Study findStudyToUpdateZone(String path) {
-        return studyRepository.findAccountWithZoneByPath(path);
+        return studyRepository.findStudyWithZoneByPath(path);
+    }
+
+    public Study findStudyWithByPath(String path) {
+        return studyRepository.findStudyWithByPath(path);
     }
 }

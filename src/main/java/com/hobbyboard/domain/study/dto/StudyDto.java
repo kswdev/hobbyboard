@@ -37,6 +37,10 @@ public class StudyDto implements Serializable {
     private boolean closed;
     private boolean useBanner;
 
+    public boolean isRemovable() {
+        return !published;
+    }
+
     public static StudyDto from (Study study) {
         return StudyDto.builder()
                 .id(study.getId())

@@ -24,6 +24,9 @@ import java.util.stream.Collectors;
         @NamedAttributeNode("zones"),
         @NamedAttributeNode("studyAccounts"),
 })
+@NamedEntityGraph(name = "Study.withAccount", attributeNodes = {
+        @NamedAttributeNode("studyAccounts"),
+})
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
 @Builder @AllArgsConstructor @NoArgsConstructor
@@ -94,4 +97,37 @@ public class Study {
 
         return count > 0;
     }
+
+    public void publish() {
+        if (!this.closed && !this.published) {
+            this.setPublished(true);
+            this.setPublishedDateTime(LocalDateTime.now());
+        } else {
+            throw new RuntimeException();
+        }
+    }
+
+    public void close() {
+        if (!this.closed && !this.published) {
+            this.setClosed(true);
+            this.setClosedDateTime(LocalDateTime.now());
+        } else {
+            throw new RuntimeException();
+        }
+    }
+
+    public void startRecruit() {
+        if (canUpdateRecruit()) {
+            this.setRecruiting(true);
+            this.setRecruitingUpdatedDateTime(LocalDateTime.now());
+        } else {
+            throw new IllegalArgumentException("3시간 이후에 시도해주세요");
+        }
+    }
+
+    private boolean canUpdateRecruit() {
+        return recruitingUpdatedDateTime.plusHours(3L).isBefore(LocalDateTime.now());
+    }
+
+
 }
