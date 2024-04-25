@@ -62,14 +62,14 @@ public class StudyAccountUsacase {
     public Study getStudyToUpdate(AccountDto accountDto, String path) {
         Study study = this.getStudy(path);
 
-        if (!study.isManagerOf(accountDto))
-            throw new AccessDeniedException("해당 기능을 사용할 수 없습니다.");
+        checkIfManager(accountDto, study);
 
         return study;
     }
 
     private Study getStudy(String path) {
         Study study = studyReadService.findWithAllByPath(path);
+
         if (study == null)
             throw new IllegalArgumentException(path + "에 해당하는 스터디가 없습니다.");
 
@@ -135,62 +135,67 @@ public class StudyAccountUsacase {
     public void startPublish(String path, AccountDto accountDto) {
         Study study = studyReadService.findStudyWithByPath(path);
 
-        if (study.isManagerOf(accountDto)) {
-            study.publish();
-        }
+        checkIfManager(accountDto, study);
+
+        study.publish();
+
     }
 
     @Transactional
     public void closeStudy(String path, AccountDto accountDto) {
         Study study = studyReadService.findStudyWithByPath(path);
 
-        if (study.isManagerOf(accountDto)) {
-            study.close();
-        }
+        checkIfManager(accountDto, study);
+
+        study.close();
     }
 
     @Transactional
-    public void startRecruit(String path, AccountDto accountDto) {
+    public boolean startRecruit(String path, AccountDto accountDto) {
         Study study = studyReadService.findStudyWithByPath(path);
 
-        if (study.isManagerOf(accountDto)) {
-            study.startRecruit();
-        }
+        checkIfManager(accountDto, study);
+
+        return study.startRecruit();
     }
 
     @Transactional
     public void stopRecruit(String path, AccountDto accountDto) {
         Study study = studyReadService.findStudyWithByPath(path);
 
-        if (study.isManagerOf(accountDto)) {
-            study.setRecruiting(false);
-            study.setRecruitingUpdatedDateTime(LocalDateTime.now());
-        }
+        checkIfManager(accountDto, study);
+
+        study.setRecruiting(false);
+        study.setRecruitingUpdatedDateTime(LocalDateTime.now());
     }
 
     @Transactional
-    public StudyDto updateStudyPath(String path, String newPath, AccountDto accountDto) {
-        Study study = studyReadService.findStudyWithByPath(path);
-
-        if (study.isManagerOf(accountDto)) {
-            study.setPath(newPath);
-        }
-
-        return StudyDto.from(study);
+    public void updateStudyPath(Study study, String newPath) {
+        study.setPath(newPath);
     }
 
     @Transactional
     public StudyDto updateStudyTitle(String path, String newTitle, AccountDto accountDto) {
         Study study = studyReadService.findStudyWithByPath(path);
 
-        if (study.isManagerOf(accountDto)) {
-            study.setTitle(newTitle);
-        }
+        checkIfManager(accountDto, study);
+
+        study.setTitle(newTitle);
 
         return StudyDto.from(study);
     }
 
+    @Transactional
     public void removeStudy(String path, AccountDto accountDto) {
+        Study study = studyReadService.findStudyWithByPath(path);
+        if (study.isRemovable())
+            studyWriteService.remove(study);
+        else
+            throw new IllegalArgumentException("스터디를 삭제할 수 없습니다.");
+    }
 
+    private static void checkIfManager(AccountDto accountDto, Study study) {
+        if (!study.isManagerOf(accountDto))
+            throw new AccessDeniedException("해당 기능을 사용할 수 없습니다.");
     }
 }

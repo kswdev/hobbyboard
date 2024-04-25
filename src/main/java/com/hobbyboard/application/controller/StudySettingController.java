@@ -62,11 +62,20 @@ public class StudySettingController {
             @PathVariable String path,
             @CurrentUser AccountDto accountDto,
             String newPath,
-            RedirectAttributes attributes
+            RedirectAttributes attributes,
+            Model model
     ) {
-        StudyDto studyDto = studyAccountUsacase.updateStudyPath(path, newPath, accountDto);
+        Study study = studyAccountUsacase.getStudyToUpdate(accountDto, path);
+        if (studyReadService.isValidPath(newPath)) {
+            model.addAttribute("study", StudyDto.from(study));
+            model.addAttribute("account", accountDto);
+            model.addAttribute("studyPathError", "해당 스터디 경로는 사용할 수 없습니다. 다른 값을 입력하세요.");
+            return "study/settings/study";
+        }
+
+        studyAccountUsacase.updateStudyPath(study, path);
         attributes.addFlashAttribute("message", "스터디 경로가 수정되었습니다.");
-        return "redirect:/study/"+ getEncode(studyDto.getPath()) +"/settings/study";
+        return "redirect:/study/"+ getEncode(newPath) +"/settings/study";
     }
 
     @PostMapping("/study/title")
@@ -87,8 +96,12 @@ public class StudySettingController {
             @CurrentUser AccountDto accountDto,
             RedirectAttributes attributes
     ) {
-        studyAccountUsacase.startRecruit(path, accountDto);
-        attributes.addFlashAttribute("message", "스터디 모집이 시작되었습니다.");
+
+        if (studyAccountUsacase.startRecruit(path, accountDto))
+            attributes.addFlashAttribute("message", "스터디 모집이 시작되었습니다.");
+        else
+            attributes.addFlashAttribute("message", "3시간 이후에 시도해주세요");
+
         return "redirect:/study/"+ path +"/settings/study";
     }
 

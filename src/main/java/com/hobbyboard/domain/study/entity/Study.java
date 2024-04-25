@@ -108,7 +108,7 @@ public class Study {
     }
 
     public void close() {
-        if (!this.closed && !this.published) {
+        if (this.published && !this.closed) {
             this.setClosed(true);
             this.setClosedDateTime(LocalDateTime.now());
         } else {
@@ -116,13 +116,13 @@ public class Study {
         }
     }
 
-    public void startRecruit() {
+    public boolean startRecruit() {
         if (canUpdateRecruit()) {
             this.setRecruiting(true);
             this.setRecruitingUpdatedDateTime(LocalDateTime.now());
-        } else {
-            throw new IllegalArgumentException("3시간 이후에 시도해주세요");
-        }
+            return true;
+        } else
+            return false;
     }
 
     private boolean canUpdateRecruit() {
@@ -130,4 +130,7 @@ public class Study {
     }
 
 
+    public boolean isRemovable() {
+         return !published;
+    }
 }

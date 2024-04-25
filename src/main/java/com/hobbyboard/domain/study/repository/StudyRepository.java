@@ -21,14 +21,14 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
     StudyZone findByStudyIdAndZoneId(Long studyId, Long zoneId);
 
     @EntityGraph(value = "Study.withTagAndManager", type = EntityGraph.EntityGraphType.LOAD)
-    Study findStudyWithTagByPath(String path);
+    Study findWithTagAndAccountByPath(String path);
 
     @EntityGraph(value = "Study.withZoneAndManager", type = EntityGraph.EntityGraphType.LOAD)
-    Study findStudyWithZoneByPath(String path);
+    Study findWithZoneAndAccountByPath(String path);
 
     Study findByPath(String path);
 
     @EntityGraph(value = "Study.withAccount", type = EntityGraph.EntityGraphType.LOAD)
-    Study findStudyWithByPath(String path);
+    Study findWithAccountByPath(String path);
 }
 

@@ -3,7 +3,6 @@ package com.hobbyboard.domain.study.dto;
 import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.study.entity.Study;
-import com.hobbyboard.domain.study.entity.StudyAccount;
 import com.hobbyboard.domain.study.entity.StudyTag;
 import com.hobbyboard.domain.study.entity.StudyZone;
 import com.hobbyboard.domain.tag.entity.Tag;
@@ -12,6 +11,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,10 +20,14 @@ import java.util.stream.Collectors;
 public class StudyDto implements Serializable {
 
     private Long id;
-    private Set<AccountDto> managers;
-    private Set<AccountDto> members;
-    private Set<String> tags;
-    private Set<ZoneDto> zones;
+    @Builder.Default
+    private Set<AccountDto> managers = new HashSet<>();
+    @Builder.Default
+    private Set<AccountDto> members = new HashSet<>();
+    @Builder.Default
+    private Set<String> tags = new HashSet<>();
+    @Builder.Default
+    private Set<ZoneDto> zones = new HashSet<>();
     private String path;
     private String title;
     private String shortDescription;

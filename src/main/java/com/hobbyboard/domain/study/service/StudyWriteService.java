@@ -45,4 +45,8 @@ public class StudyWriteService {
     public StudyTag findByStudyIdAndTagId(Long studyId, Long tagId) {
         return studyTagRepository.findByStudyIdAndTagId(studyId, tagId);
     }
+
+    public void remove(Study study) {
+        studyRepository.delete(study);
+    }
 }
