@@ -9,6 +9,7 @@ import com.hobbyboard.domain.study.entity.Study;
 import com.hobbyboard.domain.study.entity.StudyAccount;
 import com.hobbyboard.domain.study.entity.StudyTag;
 import com.hobbyboard.domain.study.entity.StudyZone;
+import com.hobbyboard.domain.study.service.StudyAccountReadService;
 import com.hobbyboard.domain.study.service.StudyReadService;
 import com.hobbyboard.domain.study.service.StudyWriteService;
 import com.hobbyboard.domain.tag.dto.TagForm;
@@ -31,6 +32,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class StudyAccountUsacase {
 
+    private final StudyAccountReadService studyAccountReadService;
     private final AccountWriteService accountWriteService;
     private final StudyWriteService studyWriteService;
     private final StudyReadService studyReadService;
@@ -56,7 +58,7 @@ public class StudyAccountUsacase {
 
     public StudyDto findByPath(String path) {
         Study study = studyReadService.findWithAllByPath(path);
-        return StudyDto.from(study);
+        return StudyDto.fromWithAll(study);
     }
 
     public Study getStudyToUpdate(AccountDto accountDto, String path) {
@@ -133,7 +135,7 @@ public class StudyAccountUsacase {
 
     @Transactional
     public void startPublish(String path, AccountDto accountDto) {
-        Study study = studyReadService.findStudyWithByPath(path);
+        Study study = studyReadService.findWithAccountByPath(path);
 
         checkIfManager(accountDto, study);
 
@@ -143,7 +145,7 @@ public class StudyAccountUsacase {
 
     @Transactional
     public void closeStudy(String path, AccountDto accountDto) {
-        Study study = studyReadService.findStudyWithByPath(path);
+        Study study = studyReadService.findWithAccountByPath(path);
 
         checkIfManager(accountDto, study);
 
@@ -152,7 +154,7 @@ public class StudyAccountUsacase {
 
     @Transactional
     public boolean startRecruit(String path, AccountDto accountDto) {
-        Study study = studyReadService.findStudyWithByPath(path);
+        Study study = studyReadService.findWithAccountByPath(path);
 
         checkIfManager(accountDto, study);
 
@@ -161,7 +163,7 @@ public class StudyAccountUsacase {
 
     @Transactional
     public void stopRecruit(String path, AccountDto accountDto) {
-        Study study = studyReadService.findStudyWithByPath(path);
+        Study study = studyReadService.findWithAccountByPath(path);
 
         checkIfManager(accountDto, study);
 
@@ -176,18 +178,18 @@ public class StudyAccountUsacase {
 
     @Transactional
     public StudyDto updateStudyTitle(String path, String newTitle, AccountDto accountDto) {
-        Study study = studyReadService.findStudyWithByPath(path);
+        Study study = studyReadService.findWithAccountByPath(path);
 
         checkIfManager(accountDto, study);
 
         study.setTitle(newTitle);
 
-        return StudyDto.from(study);
+        return StudyDto.fromWithAll(study);
     }
 
     @Transactional
     public void removeStudy(String path, AccountDto accountDto) {
-        Study study = studyReadService.findStudyWithByPath(path);
+        Study study = studyReadService.findWithAccountByPath(path);
         if (study.isRemovable())
             studyWriteService.remove(study);
         else
@@ -197,5 +199,28 @@ public class StudyAccountUsacase {
     private static void checkIfManager(AccountDto accountDto, Study study) {
         if (!study.isManagerOf(accountDto))
             throw new AccessDeniedException("해당 기능을 사용할 수 없습니다.");
+    }
+
+    @Transactional
+    public void joinStudy(AccountDto accountDto, String path) {
+        //엔티티 조회
+        Account account = accountWriteService.findById(accountDto.getId());
+
+        //스터디 회원 생성
+        StudyAccount newStudyAccount = new StudyAccount(account);
+
+        //스터디 생성
+        Study study = studyReadService.findWithAccountByPath(path);
+        study.addMember(newStudyAccount);
+    }
+
+    @Transactional
+    public void leaveStudy(AccountDto accountDto, String path) {
+
+        Study study = studyReadService.findWithAccountByPath(path);
+
+        StudyAccount studyAccount = studyAccountReadService.findByStudyIdAndAccountId(study.getId(), accountDto.getId());
+
+        study.removeMember(studyAccount);
     }
 }

@@ -35,7 +35,7 @@ public class WithAccountSecurityContextFactory implements WithSecurityContextFac
 
         accountRepository.save(newAccount);
 
-        AccountDto account = AccountDto.fromAccount(
+        AccountDto account = AccountDto.from(
                 accountRepository.findByNickname("nickname"));
 
         System.out.println("@@@@@@@@@@@@@@");

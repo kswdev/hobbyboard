@@ -42,7 +42,7 @@ public class AccountDto implements Serializable {
     private boolean studyUpdatedByEmail;
     private boolean studyUpdatedByWeb;
 
-    public static AccountDto fromAccount(Account account) {
+    public static AccountDto from(Account account) {
         return AccountDto.builder()
                 .id(account.getId())
                 .password(account.getPassword())

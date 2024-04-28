@@ -46,7 +46,7 @@ public class AccountReadService {
 
     public AccountDto findByEmail(String email) {
         return Optional.ofNullable(accountRepository.findByEmail(email))
-                .map(AccountDto::fromAccount)
+                .map(AccountDto::from)
                 .orElseThrow(() -> new IllegalArgumentException("email"));
     }
 

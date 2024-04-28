@@ -111,7 +111,7 @@ class SettingsControllerTest {
         TagForm tagForm = new TagForm();
         tagForm.setTagTitle("newTag");
 
-        accountTagUsacase.addTag(AccountDto.fromAccount(account), tagForm);
+        accountTagUsacase.addTag(AccountDto.from(account), tagForm);
 
         mockMvc.perform(post(ROOT + SETTINGS + TAGS + "/remove")
                         .contentType(MediaType.APPLICATION_JSON)

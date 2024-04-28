@@ -89,6 +89,12 @@ public class Study {
         getStudyAccounts().add(studyAccount);
     }
 
+    public void addMember(StudyAccount studyAccount) {
+        studyAccount.setRole(StudyAccount.Role.MEMBER);
+        studyAccount.setStudy(this);
+        getStudyAccounts().add(studyAccount);
+    }
+
     public boolean isManagerOf(AccountDto accountDto) {
         long count = studyAccounts.stream()
                 .filter(studyAccount -> Objects.equals(studyAccount.getRole(), StudyAccount.Role.MANAGER))
@@ -126,11 +132,18 @@ public class Study {
     }
 
     private boolean canUpdateRecruit() {
+        if (this.recruitingUpdatedDateTime == null)
+            return true;
+
         return recruitingUpdatedDateTime.plusHours(3L).isBefore(LocalDateTime.now());
     }
 
 
     public boolean isRemovable() {
          return !published;
+    }
+
+    public void removeMember(StudyAccount studyAccount) {
+        this.studyAccounts.remove(studyAccount);
     }
 }

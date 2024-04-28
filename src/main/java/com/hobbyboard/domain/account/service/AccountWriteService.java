@@ -78,7 +78,7 @@ public class AccountWriteService {
         Account account = accountRepository.findByNickname(accountDto.getNickname());
         modelMapper.map(profile, account);
 
-        return AccountDto.fromAccount(account);
+        return AccountDto.from(account);
     }
 
     public AccountDto updatePassword(AccountDto accountDto, PasswordForm passwordForm) {
@@ -86,7 +86,7 @@ public class AccountWriteService {
         Account account = accountRepository.findByNickname(accountDto.getNickname());
         account.setPassword(passwordEncoder.encode(passwordForm.getNewPassword()));
 
-        return AccountDto.fromAccount(account);
+        return AccountDto.from(account);
     }
 
     public AccountDto updateNotification(AccountDto accountDto, Notifications notifications) {
@@ -94,7 +94,7 @@ public class AccountWriteService {
         Account account = accountRepository.findByNickname(accountDto.getNickname());
         modelMapper.map(notifications, account);
 
-        return AccountDto.fromAccount(account);
+        return AccountDto.from(account);
     }
 
     public AccountDto updateNickname(AccountDto accountDto, NicknameForm nicknameForm) {
@@ -102,7 +102,7 @@ public class AccountWriteService {
         Account account = accountRepository.findByNickname(accountDto.getNickname());
         account.setNickname(nicknameForm.getNickname());
 
-        return AccountDto.fromAccount(account);
+        return AccountDto.from(account);
     }
 
     public Account findById(Long id) {

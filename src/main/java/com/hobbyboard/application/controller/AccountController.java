@@ -113,7 +113,7 @@ public class AccountController {
         if (result.hasErrors())
             return "account/sign-up";
 
-        AccountDto account = AccountDto.fromAccount(
+        AccountDto account = AccountDto.from(
                 accountMailUsacase.saveSignUpAndSendConfirmEmail(signUpForm));
 
         accountWriteService.updateAuthentication(account, request, response);
@@ -129,7 +129,7 @@ public class AccountController {
             @RequestParam String token,
             Model model
     ) {
-        AccountDto account = AccountDto.fromAccount(
+        AccountDto account = AccountDto.from(
                 accountMailUsacase.confirmEmailProcess(email, token));
 
         model.addAttribute("nickname", account.getNickname());
@@ -156,7 +156,7 @@ public class AccountController {
             @CurrentUser AccountDto account,
             Model model
     ) {
-        AccountDto byNickname = AccountDto.fromAccount(
+        AccountDto byNickname = AccountDto.from(
                 accountReadService.findByNickname(nickname));
 
         if (byNickname == null)

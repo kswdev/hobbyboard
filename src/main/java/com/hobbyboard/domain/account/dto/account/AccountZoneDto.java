@@ -12,11 +12,10 @@ public class AccountZoneDto {
     private AccountDto accountDto;
     private ZoneDto zoneDto;
 
-    @Builder
     public static AccountZoneDto from (AccountZone accountZone) {
         return AccountZoneDto.builder()
                 .id(accountZone.getId())
-                .accountDto(AccountDto.fromAccount(accountZone.getAccount()))
+                .accountDto(AccountDto.from(accountZone.getAccount()))
                 .zoneDto(ZoneDto.from(accountZone.getZone()))
                 .build();
     }

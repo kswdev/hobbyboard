@@ -70,7 +70,7 @@ class AccountControllerTest {
 
         String token  = mailService.setEmailCheckToken(account.getEmail());
 
-        AccountDto newAccount = AccountDto.fromAccount(
+        AccountDto newAccount = AccountDto.from(
                 accountMailUsacase.confirmEmailProcess(account.getEmail(), token));
 
         mockMvc.perform(get("/check-email-token")

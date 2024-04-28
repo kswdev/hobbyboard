@@ -27,7 +27,6 @@ public class StudyController {
 
     private final StudyAccountUsacase studyAccountUsacase;
     private final StudyFormValidator studyFormValidator;
-    private final StudyReadService studyReadService;
 
     @InitBinder("studyForm")
     public void initBinder(WebDataBinder webDataBinder) {
@@ -36,6 +35,24 @@ public class StudyController {
 
     static final String STUDY = "study";
     static final String FORM = "/form";
+
+    @GetMapping("/study/{path}/join")
+    public String joinStudy(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path
+    ) {
+        studyAccountUsacase.joinStudy(accountDto, path);
+        return "redirect:/study/" + path + "/members";
+    }
+
+    @GetMapping("/study/{path}/leave")
+    public String leaveStudy(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path
+    ) {
+        studyAccountUsacase.leaveStudy(accountDto, path);
+        return "redirect:/study/" + path + "/members";
+    }
 
     @GetMapping("/new-study")
     public String newStudyForm(

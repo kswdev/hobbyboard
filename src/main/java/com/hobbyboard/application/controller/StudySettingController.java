@@ -67,7 +67,7 @@ public class StudySettingController {
     ) {
         Study study = studyAccountUsacase.getStudyToUpdate(accountDto, path);
         if (studyReadService.isValidPath(newPath)) {
-            model.addAttribute("study", StudyDto.from(study));
+            model.addAttribute("study", StudyDto.fromWithAll(study));
             model.addAttribute("account", accountDto);
             model.addAttribute("studyPathError", "해당 스터디 경로는 사용할 수 없습니다. 다른 값을 입력하세요.");
             return "study/settings/study";
@@ -145,7 +145,7 @@ public class StudySettingController {
             @CurrentUser AccountDto accountDto,
             Model model
     ) {
-        StudyDto studyDto = StudyDto.from(studyReadService.findWithAllByPath(path));
+        StudyDto studyDto = StudyDto.fromWithAll(studyReadService.findWithAllByPath(path));
 
         model.addAttribute("study", studyDto);
         model.addAttribute("account", accountDto);
@@ -162,7 +162,7 @@ public class StudySettingController {
                 .map(Zone::toString)
                 .toList();
 
-        StudyDto studyDto = StudyDto.from(studyReadService.findWithAllByPath(path));
+        StudyDto studyDto = StudyDto.fromWithAll(studyReadService.findWithAllByPath(path));
         List<String> zones = studyDto.getZones().stream()
                 .map(ZoneDto::toString)
                 .toList();
@@ -219,7 +219,7 @@ public class StudySettingController {
             @PathVariable String path,
             Model model
     ) throws JsonProcessingException {
-        StudyDto studyDto = StudyDto.from(studyReadService.findWithAllByPath(path));
+        StudyDto studyDto = StudyDto.fromWithAll(studyReadService.findWithAllByPath(path));
         Set<String> tags = studyDto.getTags();
         Set<String> allTags = tagService.findAll().stream()
                 .map(Tag::getTitle)
@@ -238,7 +238,7 @@ public class StudySettingController {
             @PathVariable String path,
             Model model
     ) {
-        StudyDto studyDto   = StudyDto.from(studyAccountUsacase.getStudyToUpdate(accountDto, path));
+        StudyDto studyDto   = StudyDto.fromWithAll(studyAccountUsacase.getStudyToUpdate(accountDto, path));
 
         model.addAttribute("account", accountDto);
         model.addAttribute("study", studyDto);
@@ -287,7 +287,7 @@ public class StudySettingController {
             @PathVariable String path,
             Model model
     ) {
-        StudyDto studyDto   = StudyDto.from(studyAccountUsacase.getStudyToUpdate(accountDto, path));
+        StudyDto studyDto   = StudyDto.fromWithAll(studyAccountUsacase.getStudyToUpdate(accountDto, path));
         StudyForm studyForm = modelMapper.map(studyDto, StudyForm.class);
 
         model.addAttribute("account", accountDto);

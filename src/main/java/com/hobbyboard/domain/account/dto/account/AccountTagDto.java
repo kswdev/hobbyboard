@@ -19,7 +19,7 @@ public class AccountTagDto implements Serializable {
     public static AccountTagDto from (AccountTag accountTag) {
         return AccountTagDto.builder()
                 .id(accountTag.getId())
-                .accountDto(AccountDto.fromAccount(accountTag.getAccount()))
+                .accountDto(AccountDto.from(accountTag.getAccount()))
                 .tag(TagDto.from(accountTag.getTag()))
                 .build();
     }

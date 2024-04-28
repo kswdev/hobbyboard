@@ -86,7 +86,7 @@ public class SecurityConfig {
                     .findByEmailAndNickname(username)
                     .orElseThrow(() -> new NoSuchElementException("없는 아이디입니다."));
 
-            AccountDto accountDto = AccountDto.fromAccount(account);
+            AccountDto accountDto = AccountDto.from(account);
 
             return new UserAccount(accountDto);
         };

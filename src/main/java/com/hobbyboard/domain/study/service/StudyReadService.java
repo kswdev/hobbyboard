@@ -31,7 +31,7 @@ public class StudyReadService {
         return studyRepository.findWithZoneAndAccountByPath(path);
     }
 
-    public Study findStudyWithByPath(String path) {
+    public Study findWithAccountByPath(String path) {
         return studyRepository.findWithAccountByPath(path);
     }
 

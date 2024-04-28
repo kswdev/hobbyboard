@@ -10,6 +10,8 @@ import com.hobbyboard.domain.zone.dto.ZoneDto;
 import lombok.*;
 
 import java.io.Serializable;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,7 +47,7 @@ public class StudyDto implements Serializable {
         return !published;
     }
 
-    public static StudyDto from (Study study) {
+    public static StudyDto fromWithAll(Study study) {
         return StudyDto.builder()
                 .id(study.getId())
                 .tags(study.getTags().stream()
@@ -57,11 +59,29 @@ public class StudyDto implements Serializable {
                         .map(ZoneDto::from)
                         .collect(Collectors.toUnmodifiableSet()))
                 .managers(study.getManagers().stream()
-                        .map(AccountDto::fromAccount)
+                        .map(AccountDto::from)
                         .collect(Collectors.toUnmodifiableSet()))
                 .members(study.getMembers().stream()
-                        .map(AccountDto::fromAccount)
+                        .map(AccountDto::from)
                         .collect(Collectors.toUnmodifiableSet()))
+                .path(study.getPath())
+                .title(study.getTitle())
+                .shortDescription(study.getShortDescription())
+                .fullDescription(study.getFullDescription())
+                .image(study.getImage())
+                .publishedDateTime(study.getPublishedDateTime())
+                .closedDateTime(study.getClosedDateTime())
+                .recruitingUpdatedDateTime(study.getRecruitingUpdatedDateTime())
+                .recruiting(study.isRecruiting())
+                .published(study.isPublished())
+                .closed(study.isClosed())
+                .useBanner(study.isUseBanner())
+                .build();
+    }
+
+    public static StudyDto from(Study study) {
+        return StudyDto.builder()
+                .id(study.getId())
                 .path(study.getPath())
                 .title(study.getTitle())
                 .shortDescription(study.getShortDescription())
@@ -97,5 +117,9 @@ public class StudyDto implements Serializable {
 
     public boolean isManagerOf(AccountDto accountDto) {
         return managers.contains(accountDto);
+    }
+
+    public String getEncodePath() {
+        return URLEncoder.encode(this.getPath(), StandardCharsets.UTF_8);
     }
 }
