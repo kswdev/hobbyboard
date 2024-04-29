@@ -40,14 +40,8 @@ public class EventDto implements Serializable {
     private List<EnrollmentDto> enrollments = new ArrayList<>();
 
     private EventType eventType;
-    private boolean attended;
-    private boolean canAccept;
-    private boolean canReject;
-    private boolean disEnrollableFor;
-    private boolean enrollableFor;
-    private long NumberOfAcceptedEnrollments;
 
-    public static EventDto from (Event event) {
+    public static EventDto fromWithEnrollments(Event event) {
         return EventDto.builder()
                 .id(event.getId())
                 .study(StudyDto.from(event.getStudy()))
@@ -55,6 +49,22 @@ public class EventDto implements Serializable {
                 .enrollments(event.getEnrollments().stream()
                         .map(EnrollmentDto::from)
                         .toList())
+                .title(event.getTitle())
+                .description(event.getDescription())
+                .createdDateTime(event.getCreatedDateTime())
+                .endEnrollmentDateTime(event.getEndEnrollmentDateTime())
+                .startDateTime(event.getStartDateTime())
+                .endDateTime(event.getEndDateTime())
+                .limitOfEnrollments(event.getLimitOfEnrollments())
+                .eventType(event.getEventType())
+                .build();
+    }
+
+    public static EventDto from(Event event) {
+        return EventDto.builder()
+                .id(event.getId())
+                .study(StudyDto.from(event.getStudy()))
+                .createdBy(AccountDto.from(event.getCreateBy()))
                 .title(event.getTitle())
                 .description(event.getDescription())
                 .createdDateTime(event.getCreatedDateTime())
@@ -97,5 +107,28 @@ public class EventDto implements Serializable {
 
     public boolean isEnrollableFor(UserAccount userAccount) {
         return isNotClosed() && !isAttended(userAccount) && !isAlreadyEnrolled(userAccount);
+    }
+
+    public int numberOfRemainSpots() {
+        return this.limitOfEnrollments - (int) this.enrollments.stream().filter(EnrollmentDto::isAccepted).count();
+    }
+
+    public long getNumberOfAcceptedEnrollments() {
+        return this.enrollments.stream().filter(EnrollmentDto::isAccepted).count();
+    }
+
+    public boolean canAccept(EnrollmentDto enrollment) {
+        return this.eventType == EventType.CONFIRMATIVE
+                && this.enrollments.contains(enrollment)
+                && this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments()
+                && !enrollment.isAttended()
+                && !enrollment.isAccepted();
+    }
+
+    public boolean canReject(EnrollmentDto enrollment) {
+        return this.eventType == EventType.CONFIRMATIVE
+                && this.enrollments.contains(enrollment)
+                && !enrollment.isAttended()
+                && enrollment.isAccepted();
     }
 }

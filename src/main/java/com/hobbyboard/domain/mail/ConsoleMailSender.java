@@ -14,10 +14,6 @@ import java.io.InputStream;
 @Profile({"local", "dev"})
 public class ConsoleMailSender implements JavaMailSender {
 
-    public ConsoleMailSender() {
-        System.out.println("@@@@@@@@@@@@@@@@@@@@");
-    }
-
     @Override
     public MimeMessage createMimeMessage() {
         return null;

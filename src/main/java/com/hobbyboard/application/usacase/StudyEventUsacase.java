@@ -3,7 +3,6 @@ package com.hobbyboard.application.usacase;
 import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.account.service.AccountReadService;
-import com.hobbyboard.domain.event.dto.event.EnrollmentDto;
 import com.hobbyboard.domain.event.dto.event.EventDto;
 import com.hobbyboard.domain.event.dto.event.EventForm;
 import com.hobbyboard.domain.event.entity.Event;
@@ -11,7 +10,6 @@ import com.hobbyboard.domain.event.service.EventReadService;
 import com.hobbyboard.domain.event.service.EventWriteService;
 import com.hobbyboard.domain.study.dto.StudyDto;
 import com.hobbyboard.domain.study.entity.Study;
-import com.hobbyboard.domain.study.service.StudyReadService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
@@ -48,17 +46,12 @@ public class StudyEventUsacase {
     @Transactional(readOnly = true)
     public EventDto findWithEnrollmentById(Long id) {
         return eventReadService.findById(id)
-                .map(EventDto::from)
+                .map(EventDto::fromWithEnrollments)
                 .orElseThrow(() -> new IllegalArgumentException("없는 모임입니다."));
     }
 
-    public EventDto findWithEnrollmentByIdAndCheckAccount(Long id, AccountDto accountDto) {
-        Account account = modelMapper.map(accountDto, Account.class);
-        Event event = eventReadService.findById(id).orElseThrow();
-
-        EventDto eventDto = EventDto.builder()
-                .attended(event.isAttended(account))
-                .canAccept(event.canAccept(event.g))
-                .build();
+    @Transactional(readOnly = true)
+    public List<Event> findByStudyIdOrderByStartDateTime(Long id) {
+        return eventReadService.findByStudyIdOrderByStartDateTime(id);
     }
 }

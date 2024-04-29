@@ -38,10 +38,6 @@ public class WithAccountSecurityContextFactory implements WithSecurityContextFac
         AccountDto account = AccountDto.from(
                 accountRepository.findByNickname("nickname"));
 
-        System.out.println("@@@@@@@@@@@@@@");
-        System.out.println(account.getId());
-        System.out.println("@@@@@@@@@@@@@@");
-
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                 new UserAccount(account),
                 account.getPassword(),

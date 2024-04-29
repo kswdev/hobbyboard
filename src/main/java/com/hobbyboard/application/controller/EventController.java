@@ -7,7 +7,6 @@ import com.hobbyboard.domain.event.dto.event.EventDto;
 import com.hobbyboard.domain.event.dto.event.EventForm;
 import com.hobbyboard.domain.event.dto.event.EventFormValidator;
 import com.hobbyboard.domain.event.entity.Event;
-import com.hobbyboard.domain.event.service.EventReadService;
 import com.hobbyboard.domain.study.dto.StudyDto;
 import com.hobbyboard.domain.study.service.StudyReadService;
 import jakarta.validation.Valid;
@@ -18,6 +17,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiredArgsConstructor
 @RequestMapping("/study/{path}")
 @Controller
@@ -25,7 +28,6 @@ public class EventController {
 
     private final StudyEventUsacase studyEventUsacase;
     private final StudyReadService studyReadService;
-    private final EventReadService eventReadService;
     private final EventFormValidator eventFormValidator;
 
     @InitBinder("eventForm")
@@ -57,12 +59,38 @@ public class EventController {
     ) {
 
         StudyDto study = StudyDto.fromWithAll(studyReadService.findWithAllByPath(path));
-        EventDto event = studyEventUsacase.findWithEnrollmentByIdAndCheckAccount(id, accountDto);
+        EventDto event = studyEventUsacase.findWithEnrollmentById(id);
 
         model.addAttribute("event", event);
         model.addAttribute("account", accountDto);
         model.addAttribute("study", study);
         return "event/view";
+    }
+
+    @GetMapping("/events")
+    public String viewStudyEvents(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path,
+            Model model
+    ) {
+        StudyDto studyDto = StudyDto.fromWithAll(studyReadService.findWithAllByPath(path));
+
+        List<EventDto> newEvents = new ArrayList<>();
+        List<EventDto> oldEvents = new ArrayList<>();
+
+        studyEventUsacase.findByStudyIdOrderByStartDateTime(studyDto.getId())
+                .forEach((event) -> {
+                    if (event.getEndDateTime().isBefore(LocalDateTime.now()))
+                        oldEvents.add(EventDto.from(event));
+                    else
+                        newEvents.add(EventDto.from(event));
+                });
+
+        model.addAttribute("newEvents", newEvents);
+        model.addAttribute("oldEvents", oldEvents);
+        model.addAttribute("account", accountDto);
+        model.addAttribute("study", studyDto);
+        return "study/events";
     }
 
     @PostMapping("/new-event")
