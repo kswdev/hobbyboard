@@ -110,7 +110,9 @@ public class EventDto implements Serializable {
     }
 
     public int numberOfRemainSpots() {
-        return this.limitOfEnrollments - (int) this.enrollments.stream().filter(EnrollmentDto::isAccepted).count();
+        return this.limitOfEnrollments - (int) this.enrollments.stream()
+                .filter(EnrollmentDto::isAccepted)
+                .count();
     }
 
     public long getNumberOfAcceptedEnrollments() {

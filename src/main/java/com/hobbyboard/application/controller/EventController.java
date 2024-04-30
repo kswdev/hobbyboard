@@ -7,10 +7,13 @@ import com.hobbyboard.domain.event.dto.event.EventDto;
 import com.hobbyboard.domain.event.dto.event.EventForm;
 import com.hobbyboard.domain.event.dto.event.EventFormValidator;
 import com.hobbyboard.domain.event.entity.Event;
+import com.hobbyboard.domain.event.service.EventReadService;
 import com.hobbyboard.domain.study.dto.StudyDto;
 import com.hobbyboard.domain.study.service.StudyReadService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/study/{path}")
 @Controller
@@ -28,26 +32,55 @@ public class EventController {
 
     private final StudyEventUsacase studyEventUsacase;
     private final StudyReadService studyReadService;
+    private final EventReadService eventReadService;
     private final EventFormValidator eventFormValidator;
+    private final ModelMapper modelMapper;
 
     @InitBinder("eventForm")
     public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(eventFormValidator);
     }
 
-    @GetMapping("/new-event")
-    public String newEventForm(
+    @GetMapping("/events/{id}/edit")
+    public String updateEventForm(
             @CurrentUser AccountDto accountDto,
             @PathVariable String path,
+            @PathVariable Long id,
             Model model
     ) {
 
-        StudyDto study = StudyDto.fromWithAll(studyReadService.findWithAllByPath(path));
+        StudyDto studyDto = StudyDto.fromWithAll(studyReadService.findWithAllByPath(path));
+        EventDto eventDto = EventDto.from(eventReadService.findById(id).orElseThrow());
 
-        model.addAttribute(new EventForm());
+        model.addAttribute(modelMapper.map(eventDto, EventForm.class));
+        model.addAttribute("study", studyDto);
+        model.addAttribute("event", eventDto);
         model.addAttribute("account", accountDto);
-        model.addAttribute("study", study);
-        return "event/form";
+        return "event/update-form";
+    }
+    @PostMapping("/events/{id}/edit")
+    public String updateEventSubmit(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path,
+            @PathVariable Long id,
+            @Valid EventForm eventForm,
+            BindingResult errors,
+            Model model
+    ) {
+        StudyDto study = StudyDto.fromWithAll(studyReadService.findWithAllByPath(path));
+        EventDto event = studyEventUsacase.findWithEnrollmentById(id);
+
+        eventFormValidator.validateUpdateForm(eventForm, event, errors);
+
+        if (errors.hasErrors()) {
+            model.addAttribute(eventForm);
+            model.addAttribute("study", study);
+            model.addAttribute("account", accountDto);
+            return "event/update-form";
+        }
+
+        studyEventUsacase.updateEvent(id, eventForm);
+        return "redirect:/study/" + study.getEncodePath() + "/events/" + event.getId();
     }
 
     @GetMapping("/events/{id}")
@@ -75,15 +108,16 @@ public class EventController {
     ) {
         StudyDto studyDto = StudyDto.fromWithAll(studyReadService.findWithAllByPath(path));
 
+        log.info("studyDto ; {}", studyDto);
         List<EventDto> newEvents = new ArrayList<>();
         List<EventDto> oldEvents = new ArrayList<>();
 
         studyEventUsacase.findByStudyIdOrderByStartDateTime(studyDto.getId())
                 .forEach((event) -> {
                     if (event.getEndDateTime().isBefore(LocalDateTime.now()))
-                        oldEvents.add(EventDto.from(event));
+                        oldEvents.add(event);
                     else
-                        newEvents.add(EventDto.from(event));
+                        newEvents.add(event);
                 });
 
         model.addAttribute("newEvents", newEvents);
@@ -91,6 +125,21 @@ public class EventController {
         model.addAttribute("account", accountDto);
         model.addAttribute("study", studyDto);
         return "study/events";
+    }
+
+    @GetMapping("/new-event")
+    public String newEventForm(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path,
+            Model model
+    ) {
+
+        StudyDto study = StudyDto.fromWithAll(studyReadService.findWithAllByPath(path));
+
+        model.addAttribute(new EventForm());
+        model.addAttribute("account", accountDto);
+        model.addAttribute("study", study);
+        return "event/form";
     }
 
     @PostMapping("/new-event")

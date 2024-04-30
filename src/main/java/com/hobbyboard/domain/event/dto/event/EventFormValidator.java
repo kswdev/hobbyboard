@@ -1,6 +1,7 @@
 package com.hobbyboard.domain.event.dto.event;
 
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -28,5 +29,10 @@ public class EventFormValidator implements Validator {
 
         if (eventForm.getStartDateTime().isBefore(eventForm.getEndEnrollmentDateTime()))
             errors.rejectValue("startDateTime", "wrong.datetime", "모임 접수 시작 일시를 정확히 입력하세요.");
+    }
+
+    public void validateUpdateForm(EventForm eventForm, EventDto event, BindingResult errors) {
+        if (eventForm.getLimitOfEnrollments() < event.getNumberOfAcceptedEnrollments())
+            errors.rejectValue("limitOfEnrollments", "wrong.value","확인된 참가 신청보다 모집 인원 수가 커야 합나다.");
     }
 }

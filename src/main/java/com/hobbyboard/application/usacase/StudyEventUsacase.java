@@ -51,7 +51,17 @@ public class StudyEventUsacase {
     }
 
     @Transactional(readOnly = true)
-    public List<Event> findByStudyIdOrderByStartDateTime(Long id) {
-        return eventReadService.findByStudyIdOrderByStartDateTime(id);
+    public List<EventDto> findByStudyIdOrderByStartDateTime(Long id) {
+        return eventReadService.findByStudyIdOrderByStartDateTime(id).stream()
+                .map(EventDto::fromWithEnrollments)
+                .toList();
+    }
+
+    @Transactional
+    public void updateEvent(Long id, EventForm eventForm) {
+        Event event = eventWriteService.findById(id).orElseThrow();
+        modelMapper.map(eventForm, event);
+
+        //TODO 모집 인원을 늘린 선착순 모임의 경우에, 자동 으로 추가 인원 신청 수락
     }
 }

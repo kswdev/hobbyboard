@@ -1,10 +1,7 @@
 package com.hobbyboard.domain.event.entity;
 
-import com.hobbyboard.domain.account.dto.account.AccountDto;
-import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.event.dto.EventType;
-import com.hobbyboard.domain.event.dto.event.EnrollmentDto;
 import com.hobbyboard.domain.study.entity.Study;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,6 +10,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@NamedEntityGraph(name = "Event.withAccountAndStudy", attributeNodes = {
+        @NamedAttributeNode("study"),
+        @NamedAttributeNode("createBy")
+})
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
 @Builder @NoArgsConstructor @AllArgsConstructor

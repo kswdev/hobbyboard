@@ -27,3 +27,7 @@ spring:
   session:
     redis:
       namespace: spring:session
+
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: trace

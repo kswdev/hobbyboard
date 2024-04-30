@@ -6,8 +6,12 @@ import com.hobbyboard.domain.event.repository.EnrollmentRepository;
 import com.hobbyboard.domain.event.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class EventWriteService {
 
@@ -20,5 +24,9 @@ public class EventWriteService {
 
     public Event save(Event event) {
         return eventRepository.save(event);
+    }
+
+    public Optional<Event> findById(Long id) {
+        return eventRepository.findById(id);
     }
 }

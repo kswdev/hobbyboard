@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@ToString
 @Getter @Setter
 @Builder @AllArgsConstructor @NoArgsConstructor
 public class StudyDto implements Serializable {
