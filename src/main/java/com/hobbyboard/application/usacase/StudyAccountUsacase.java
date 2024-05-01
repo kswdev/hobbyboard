@@ -196,7 +196,7 @@ public class StudyAccountUsacase {
             throw new IllegalArgumentException("스터디를 삭제할 수 없습니다.");
     }
 
-    private static void checkIfManager(AccountDto accountDto, Study study) {
+    public void checkIfManager(AccountDto accountDto, Study study) {
         if (!study.isManagerOf(accountDto))
             throw new AccessDeniedException("해당 기능을 사용할 수 없습니다.");
     }

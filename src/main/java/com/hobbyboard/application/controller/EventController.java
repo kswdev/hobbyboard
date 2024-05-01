@@ -1,6 +1,8 @@
 package com.hobbyboard.application.controller;
 
 import com.hobbyboard.annotation.CurrentUser;
+import com.hobbyboard.application.usacase.EventEnrollmentUsacase;
+import com.hobbyboard.application.usacase.StudyAccountUsacase;
 import com.hobbyboard.application.usacase.StudyEventUsacase;
 import com.hobbyboard.domain.account.dto.account.AccountDto;
 import com.hobbyboard.domain.event.dto.event.EventDto;
@@ -8,7 +10,9 @@ import com.hobbyboard.domain.event.dto.event.EventForm;
 import com.hobbyboard.domain.event.dto.event.EventFormValidator;
 import com.hobbyboard.domain.event.entity.Event;
 import com.hobbyboard.domain.event.service.EventReadService;
+import com.hobbyboard.domain.event.service.EventWriteService;
 import com.hobbyboard.domain.study.dto.StudyDto;
+import com.hobbyboard.domain.study.entity.Study;
 import com.hobbyboard.domain.study.service.StudyReadService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +35,10 @@ import java.util.List;
 public class EventController {
 
     private final StudyEventUsacase studyEventUsacase;
+    private final StudyAccountUsacase studyAccountUsacase;
+    private final EventEnrollmentUsacase eventEnrollmentUsacase;
     private final StudyReadService studyReadService;
+    private final EventWriteService eventWriteService;
     private final EventReadService eventReadService;
     private final EventFormValidator eventFormValidator;
     private final ModelMapper modelMapper;
@@ -39,6 +46,27 @@ public class EventController {
     @InitBinder("eventForm")
     public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(eventFormValidator);
+    }
+
+    @PostMapping("/events/{id}/enroll")
+    public String enrollEvent(
+            @PathVariable Long id,
+            @PathVariable String path,
+            @CurrentUser AccountDto accountDto
+    ) {
+        eventEnrollmentUsacase.eventEnrollment(id, accountDto);
+        return "redirect:/study/" + path + "/events/" + id;
+    }
+    @DeleteMapping("/events/{id}")
+    public String cancelEvent(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path,
+            @PathVariable Long id
+    ) {
+        Study study = studyReadService.findWithAccountByPath(path);
+        studyAccountUsacase.checkIfManager(accountDto, study);
+        eventWriteService.delete(eventReadService.findById(id).orElseThrow());
+        return "redirect:/study/" + StudyDto.from(study).getEncodePath() + "/events";
     }
 
     @GetMapping("/events/{id}/edit")
@@ -74,6 +102,7 @@ public class EventController {
 
         if (errors.hasErrors()) {
             model.addAttribute(eventForm);
+            model.addAttribute("event", event);
             model.addAttribute("study", study);
             model.addAttribute("account", accountDto);
             return "event/update-form";

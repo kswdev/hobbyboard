@@ -25,6 +25,7 @@ public class AccountDto implements Serializable {
 
     private String password;
 
+    @Builder.Default
     private Set<RoleType> roleTypes = new HashSet<>();
     private boolean emailVerified;
     private LocalDateTime joinedAt;

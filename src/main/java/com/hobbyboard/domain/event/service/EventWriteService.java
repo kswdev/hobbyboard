@@ -29,4 +29,8 @@ public class EventWriteService {
     public Optional<Event> findById(Long id) {
         return eventRepository.findById(id);
     }
+
+    public void delete(Event event) {
+        eventRepository.delete(event);
+    }
 }

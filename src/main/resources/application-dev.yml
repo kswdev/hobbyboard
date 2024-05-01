@@ -28,6 +28,8 @@ spring:
     redis:
       namespace: spring:session
 
+  mvc.hiddenmethod.filter.enabled: true
+
 logging:
   level:
     org.hibernate.orm.jdbc.bind: trace

@@ -37,6 +37,7 @@ public class EventDto implements Serializable {
 
     private Integer limitOfEnrollments;
 
+    @Builder.Default
     private List<EnrollmentDto> enrollments = new ArrayList<>();
 
     private EventType eventType;

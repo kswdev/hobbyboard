@@ -23,4 +23,8 @@ public class EventReadService {
     public List<Event> findByStudyIdOrderByStartDateTime(Long id) {
         return eventRepository.findByStudyIdOrderByStartDateTime(id);
     }
+
+    public Optional<Event> findWithEnrollmentsById(Long eventId) {
+        return eventRepository.findWithEnrollmentsById(eventId);
+    }
 }
