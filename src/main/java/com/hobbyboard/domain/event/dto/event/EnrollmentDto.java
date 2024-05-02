@@ -18,6 +18,7 @@ public class EnrollmentDto {
 
     public static EnrollmentDto from (Enrollment enrollment) {
         return EnrollmentDto.builder()
+                .id(enrollment.getId())
                 .account(AccountDto.from(enrollment.getAccount()))
                 .enrolledAt(enrollment.getEnrolledAt())
                 .accepted(enrollment.isAccepted())

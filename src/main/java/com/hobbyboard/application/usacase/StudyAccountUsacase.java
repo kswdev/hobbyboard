@@ -190,6 +190,8 @@ public class StudyAccountUsacase {
     @Transactional
     public void removeStudy(String path, AccountDto accountDto) {
         Study study = studyReadService.findWithAccountByPath(path);
+        checkIfManager(accountDto, study)
+        ;
         if (study.isRemovable())
             studyWriteService.remove(study);
         else
@@ -222,5 +224,12 @@ public class StudyAccountUsacase {
         StudyAccount studyAccount = studyAccountReadService.findByStudyIdAndAccountId(study.getId(), accountDto.getId());
 
         study.removeMember(studyAccount);
+    }
+
+    public Study getStudyWithAccountToUpdate(AccountDto accountDto, String path) {
+        Study study = studyReadService.findWithAccountByPath(path);
+
+        checkIfManager(accountDto, study);
+        return study;
     }
 }

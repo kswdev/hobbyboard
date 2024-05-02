@@ -1,16 +1,14 @@
 package com.hobbyboard.domain.event.entity;
 
-import com.hobbyboard.domain.account.dto.account.AccountDto;
-import com.hobbyboard.domain.account.dto.security.UserAccount;
 import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.event.dto.EventType;
-import com.hobbyboard.domain.event.dto.event.EnrollmentDto;
 import com.hobbyboard.domain.study.entity.Study;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @NamedEntityGraph(name = "Event.withAccountAndStudy", attributeNodes = {
@@ -56,7 +54,7 @@ public class Event {
     private Integer limitOfEnrollments;
 
     @Builder.Default
-    @OneToMany(mappedBy = "event", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Enrollment> enrollments = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -79,11 +77,6 @@ public class Event {
         this.getEnrollments().add(enrollment);
     }
 
-    private void addEnrollmentAndAttend(Enrollment enrollment) {
-        enrollment.setAttended(true);
-        this.addEnrollment(enrollment);
-    }
-
     private void addEnrollmentAndAccept(Enrollment enrollment) {
         enrollment.setAccepted(true);
         this.addEnrollment(enrollment);
@@ -91,15 +84,19 @@ public class Event {
 
     public void submitEnrollment(Enrollment enrollment) {
 
-        if (this.eventType == EventType.CONFIRMATIVE)
-            addEnrollmentAndAttend(enrollment);
+        if (this.eventType == EventType.CONFIRMATIVE) {
 
-        else if (this.eventType == EventType.FCFS) {
+            if (this.getCreateBy().equals(enrollment.getAccount()))
+                addEnrollmentAndAccept(enrollment);
+            else
+                addEnrollment(enrollment);
+
+        } else if (this.eventType == EventType.FCFS) {
 
             if (this.limitOfEnrollments > getNumberOfAcceptedEnrollments())
                 addEnrollmentAndAccept(enrollment);
             else
-                addEnrollmentAndAttend(enrollment);
+                addEnrollment(enrollment);
         }
 
     }
@@ -110,5 +107,58 @@ public class Event {
 
     public boolean canSubmit(Account account) {
         return !isAlreadyEnrolled(account) && isNotClosed();
+    }
+
+    public void disenrollment(Enrollment enrollment) {
+        this.enrollments.remove(enrollment);
+
+        if (this.eventType == EventType.FCFS)
+            acceptRestOfEnrollments();
+
+    }
+
+    public long getRestOfCanBeAccepted() {
+        return this.limitOfEnrollments - getNumberOfAcceptedEnrollments();
+    }
+
+    private void acceptNextEnrollments(long number) {
+        this.enrollments.stream()
+                .filter(enrollment -> !enrollment.isAccepted())
+                .sorted(Comparator.comparing(Enrollment::getEnrolledAt))
+                .limit(number)
+                .forEach(nextEnrollment -> nextEnrollment.setAccepted(true));
+    }
+
+    public void acceptRestOfEnrollments() {
+        long numberOf = getRestOfCanBeAccepted();
+        acceptNextEnrollments(numberOf);
+    }
+
+    public void acceptEnrollment(Account account, Long enrollmentId) {
+
+        checkIfManager(account);
+
+        if (getRestOfCanBeAccepted() <= 0)
+            throw new IllegalArgumentException("이미 모든 자리가 찾습니다.");
+
+        this.getEnrollments().stream()
+                .filter(enrollment -> enrollment.getId().equals(enrollmentId))
+                .findAny()
+                .ifPresent(enrollment -> enrollment.setAccepted(true));
+    }
+
+    public void rejectEnrollment(Account account, Long enrollmentId) {
+
+        checkIfManager(account);
+
+        this.getEnrollments().stream()
+                .filter(enrollment -> enrollment.getId().equals(enrollmentId))
+                .findAny()
+                .ifPresent(enrollment -> enrollment.setAccepted(false));
+    }
+
+    private void checkIfManager(Account account) {
+        if (!this.getCreateBy().equals(account))
+            throw new IllegalArgumentException("이벤트 관리자가 아닙니다.");
     }
 }

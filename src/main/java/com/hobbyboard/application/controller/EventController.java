@@ -24,6 +24,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,15 +50,53 @@ public class EventController {
         webDataBinder.addValidators(eventFormValidator);
     }
 
+    @GetMapping("/events/{eventId}/enrollments/{enrollmentId}/accept")
+    public String acceptEnrollment(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path,
+            @PathVariable Long eventId,
+            @PathVariable Long enrollmentId
+    ) {
+        eventEnrollmentUsacase.acceptEnrollment(accountDto, eventId, enrollmentId);
+        return "redirect:/study/" + getEncode(path) + "/events/" + eventId;
+    }
+
+    @GetMapping("/events/{eventId}/enrollments/{enrollmentId}/reject")
+    public String rejectEnrollment(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable String path,
+            @PathVariable Long eventId,
+            @PathVariable Long enrollmentId
+    ) {
+        eventEnrollmentUsacase.rejectEnrollment(accountDto, eventId, enrollmentId);
+        return "redirect:/study/" + getEncode(path) + "/events/" + eventId;
+    }
+
+    private String getEncode(String path) {
+        return URLEncoder.encode(path, StandardCharsets.UTF_8);
+    }
     @PostMapping("/events/{id}/enroll")
     public String enrollEvent(
             @PathVariable Long id,
             @PathVariable String path,
             @CurrentUser AccountDto accountDto
     ) {
-        eventEnrollmentUsacase.eventEnrollment(id, accountDto);
-        return "redirect:/study/" + path + "/events/" + id;
+        StudyDto studyDto = studyAccountUsacase.findByPath(path);
+        eventEnrollmentUsacase.enrollment(id, accountDto);
+        return "redirect:/study/" + studyDto.getEncodePath() + "/events/" + id;
     }
+
+    @PostMapping("/events/{id}/disenroll")
+    public String disEnrollEvent(
+            @PathVariable Long id,
+            @PathVariable String path,
+            @CurrentUser AccountDto accountDto
+    ) {
+        StudyDto studyDto = studyAccountUsacase.findByPath(path);
+        eventEnrollmentUsacase.disenrollment(id, accountDto);
+        return "redirect:/study/" + studyDto.getEncodePath() + "/events/" + id;
+    }
+
     @DeleteMapping("/events/{id}")
     public String cancelEvent(
             @CurrentUser AccountDto accountDto,
@@ -66,7 +106,7 @@ public class EventController {
         Study study = studyReadService.findWithAccountByPath(path);
         studyAccountUsacase.checkIfManager(accountDto, study);
         eventWriteService.delete(eventReadService.findById(id).orElseThrow());
-        return "redirect:/study/" + StudyDto.from(study).getEncodePath() + "/events";
+        return "redirect:/study/" + study.getEncodePath() + "/events";
     }
 
     @GetMapping("/events/{id}/edit")
@@ -108,7 +148,7 @@ public class EventController {
             return "event/update-form";
         }
 
-        studyEventUsacase.updateEvent(id, eventForm);
+        eventEnrollmentUsacase.updateEvent(id, eventForm);
         return "redirect:/study/" + study.getEncodePath() + "/events/" + event.getId();
     }
 

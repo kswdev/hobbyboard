@@ -5,6 +5,8 @@ import com.hobbyboard.domain.account.entity.Account;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -145,5 +147,9 @@ public class Study {
 
     public void removeMember(StudyAccount studyAccount) {
         this.studyAccounts.remove(studyAccount);
+    }
+
+    public String getEncodePath() {
+        return URLEncoder.encode(this.getPath(), StandardCharsets.UTF_8);
     }
 }
