@@ -41,16 +41,15 @@ public class StudyAccountUsacase {
     private final ModelMapper modelMapper;
 
     @Transactional
-    public Study createNewStudy(StudyForm studyForm, AccountDto accountDto) {
+    public Study createNewStudy(Study study, Account account) {
 
         //엔티티 조회
-        Account account = accountWriteService.findById(accountDto.getId());
+        Account findAccount = accountWriteService.findById(account.getId());
 
         //스터디 회원 생성
-        StudyAccount newStudyAccount = new StudyAccount(account);
+        StudyAccount newStudyAccount = new StudyAccount(findAccount);
 
         //스터디 생성
-        Study study = modelMapper.map(studyForm, Study.class);
         study.addManager(newStudyAccount);
 
         return studyWriteService.save(study);

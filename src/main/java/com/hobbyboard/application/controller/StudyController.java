@@ -3,12 +3,14 @@ package com.hobbyboard.application.controller;
 import com.hobbyboard.annotation.CurrentUser;
 import com.hobbyboard.application.usacase.StudyAccountUsacase;
 import com.hobbyboard.domain.account.dto.account.AccountDto;
+import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.study.dto.StudyForm;
 import com.hobbyboard.domain.study.dto.StudyFormValidator;
 import com.hobbyboard.domain.study.entity.Study;
 import com.hobbyboard.domain.study.service.StudyReadService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,6 +29,7 @@ public class StudyController {
 
     private final StudyAccountUsacase studyAccountUsacase;
     private final StudyFormValidator studyFormValidator;
+    private final ModelMapper modelMapper;
 
     @InitBinder("studyForm")
     public void initBinder(WebDataBinder webDataBinder) {
@@ -73,7 +76,10 @@ public class StudyController {
         if (errors.hasErrors())
             return "study/form";
 
-        Study study = studyAccountUsacase.createNewStudy(studyForm, accountDto);
+
+        Study study = studyAccountUsacase.createNewStudy(
+                modelMapper.map(studyForm, Study.class),
+                modelMapper.map(accountDto, Account.class));
         return "redirect:/study/" + URLEncoder.encode(study.getPath(), StandardCharsets.UTF_8);
     }
 

@@ -18,4 +18,9 @@ public class EnrollmentReadService {
     public Enrollment findByEventAndAccount(Event event, Account account) {
         return enrollmentRepository.findByEventAndAccount(event, account);
     }
+
+    public Enrollment findById(Long enrollmentId) {
+        return enrollmentRepository.findById(enrollmentId)
+                .orElseThrow();
+    }
 }

@@ -21,9 +21,7 @@ import java.time.LocalDateTime;
 @Component
 public class EventEnrollmentUsacase {
 
-    private final EventWriteService eventWriteService;
     private final EventReadService eventReadService;
-    private final EnrollmentWriteService enrollmentWriteService;
     private final EnrollmentReadService enrollmentReadService;
     private final ModelMapper modelMapper;
 
@@ -69,16 +67,36 @@ public class EventEnrollmentUsacase {
     @Transactional
     public void acceptEnrollment(AccountDto accountDto, Long eventId, Long enrollmentId) {
         Event event = eventReadService.findWithEnrollmentsById(eventId).orElseThrow();
+        Enrollment enrollment = enrollmentReadService.findById(enrollmentId);
         Account account = modelMapper.map(accountDto, Account.class);
 
-        event.acceptEnrollment(account, enrollmentId);
+        event.acceptEnrollment(account, enrollment);
     }
 
     @Transactional
     public void rejectEnrollment(AccountDto accountDto, Long eventId, Long enrollmentId) {
         Event event = eventReadService.findWithEnrollmentsById(eventId).orElseThrow();
+        Enrollment enrollment = enrollmentReadService.findById(enrollmentId);
         Account account = modelMapper.map(accountDto, Account.class);
 
-        event.rejectEnrollment(account, enrollmentId);
+        event.rejectEnrollment(account, enrollment);
+    }
+
+    @Transactional
+    public void checkInEnrollment(AccountDto accountDto, Long eventId, Long enrollmentId) {
+        Account account = modelMapper.map(accountDto, Account.class);
+        Event event = eventReadService.findById(eventId).orElseThrow();
+        Enrollment enrollment = enrollmentReadService.findById(enrollmentId);
+
+        event.checkIn(account, enrollment);
+    }
+
+    @Transactional
+    public void checkOutEnrollment(AccountDto accountDto, Long eventId, Long enrollmentId) {
+        Account account = modelMapper.map(accountDto, Account.class);
+        Event event = eventReadService.findById(eventId).orElseThrow();
+        Enrollment enrollment = enrollmentReadService.findById(enrollmentId);
+
+        event.checkOut(account, enrollment);
     }
 }

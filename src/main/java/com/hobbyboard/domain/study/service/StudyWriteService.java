@@ -1,7 +1,9 @@
 package com.hobbyboard.domain.study.service;
 
+import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.study.dto.StudyDescriptionForm;
 import com.hobbyboard.domain.study.entity.Study;
+import com.hobbyboard.domain.study.entity.StudyAccount;
 import com.hobbyboard.domain.study.entity.StudyTag;
 import com.hobbyboard.domain.study.repository.StudyRepository;
 import com.hobbyboard.domain.study.repository.StudyTagRepository;

@@ -134,31 +134,64 @@ public class Event {
         acceptNextEnrollments(numberOf);
     }
 
-    public void acceptEnrollment(Account account, Long enrollmentId) {
-
-        checkIfManager(account);
+    public void acceptEnrollment(Account account, Enrollment enrollment) {
 
         if (getRestOfCanBeAccepted() <= 0)
             throw new IllegalArgumentException("이미 모든 자리가 찾습니다.");
 
-        this.getEnrollments().stream()
-                .filter(enrollment -> enrollment.getId().equals(enrollmentId))
+        checkIfManager(account);
+        getEnrollments().stream()
+                .filter(enroll -> enroll.equals(enrollment))
+                .filter(this::canAccept)
                 .findAny()
-                .ifPresent(enrollment -> enrollment.setAccepted(true));
+                .ifPresent(foundEnrollment -> foundEnrollment.setAccepted(true));
     }
 
-    public void rejectEnrollment(Account account, Long enrollmentId) {
+    public void rejectEnrollment(Account account, Enrollment enrollment) {
 
         checkIfManager(account);
-
-        this.getEnrollments().stream()
-                .filter(enrollment -> enrollment.getId().equals(enrollmentId))
+        getEnrollments().stream()
+                .filter(enroll -> enroll.equals(enrollment))
+                .filter(this::canReject)
                 .findAny()
-                .ifPresent(enrollment -> enrollment.setAccepted(false));
+                .ifPresent(foundEnrollment -> foundEnrollment.setAccepted(false));
     }
 
     private void checkIfManager(Account account) {
         if (!this.getCreateBy().equals(account))
             throw new IllegalArgumentException("이벤트 관리자가 아닙니다.");
+    }
+
+    private boolean canAccept(Enrollment enrollment) {
+        return this.eventType == EventType.CONFIRMATIVE
+                && this.enrollments.contains(enrollment)
+                && this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments()
+                && !enrollment.isAttended()
+                && !enrollment.isAccepted();
+    }
+
+    private boolean canReject(Enrollment enrollment) {
+        return this.eventType == EventType.CONFIRMATIVE
+                && this.enrollments.contains(enrollment)
+                && !enrollment.isAttended()
+                && enrollment.isAccepted();
+    }
+
+    public void checkIn(Account account, Enrollment enrollment) {
+        checkIfManager(account);
+        getEnrollments().stream()
+                .filter(enroll -> enroll.equals(enrollment))
+                .filter(enroll -> !enroll.isAttended())
+                .findAny()
+                .ifPresent(foundEnrollment -> foundEnrollment.setAttended(true));
+    }
+
+    public void checkOut(Account account, Enrollment enrollment) {
+        checkIfManager(account);
+        getEnrollments().stream()
+                .filter(enroll -> enroll.equals(enrollment))
+                .filter(Enrollment::isAttended)
+                .findAny()
+                .ifPresent(foundEnrollment -> foundEnrollment.setAttended(false));
     }
 }

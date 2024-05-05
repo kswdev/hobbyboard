@@ -50,6 +50,28 @@ public class EventController {
         webDataBinder.addValidators(eventFormValidator);
     }
 
+    @GetMapping("/events/{eventId}/enrollments/{enrollmentId}/checkin")
+    public String checkInEnrollment(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable Long enrollmentId,
+            @PathVariable Long eventId,
+            @PathVariable String path
+    ) {
+        eventEnrollmentUsacase.checkInEnrollment(accountDto, eventId, enrollmentId);
+        return "redirect:/study/" + getEncode(path) + "/events/" + eventId;
+    }
+
+    @GetMapping("/events/{eventId}/enrollments/{enrollmentId}/cancel-checkin")
+    public String cancelCheckInEnrollment(
+            @CurrentUser AccountDto accountDto,
+            @PathVariable Long enrollmentId,
+            @PathVariable Long eventId,
+            @PathVariable String path
+    ) {
+        eventEnrollmentUsacase.checkOutEnrollment(accountDto, eventId, enrollmentId);
+        return "redirect:/study/" + getEncode(path) + "/events/" + eventId;
+    }
+
     @GetMapping("/events/{eventId}/enrollments/{enrollmentId}/accept")
     public String acceptEnrollment(
             @CurrentUser AccountDto accountDto,
