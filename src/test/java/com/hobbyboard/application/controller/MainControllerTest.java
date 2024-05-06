@@ -56,7 +56,7 @@ class MainControllerTest {
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"))
-                .andExpect(authenticated().withUsername("ksw@gmail.com"));
+                .andExpect(authenticated().withUsername("ksw"));
     }
 
     @DisplayName("이메일 방식 로그인")
@@ -68,6 +68,6 @@ class MainControllerTest {
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"))
-                .andExpect(authenticated().withUsername("ksw@gmail.com"));
+                .andExpect(authenticated().withUsername("ksw"));
     }
 }

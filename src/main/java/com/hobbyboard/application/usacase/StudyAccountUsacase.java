@@ -9,6 +9,7 @@ import com.hobbyboard.domain.study.entity.Study;
 import com.hobbyboard.domain.study.entity.StudyAccount;
 import com.hobbyboard.domain.study.entity.StudyTag;
 import com.hobbyboard.domain.study.entity.StudyZone;
+import com.hobbyboard.domain.study.event.StudyCreatedEvent;
 import com.hobbyboard.domain.study.service.StudyAccountReadService;
 import com.hobbyboard.domain.study.service.StudyReadService;
 import com.hobbyboard.domain.study.service.StudyWriteService;
@@ -20,6 +21,7 @@ import com.hobbyboard.domain.zone.entity.Zone;
 import com.hobbyboard.domain.zone.service.ZoneService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +40,7 @@ public class StudyAccountUsacase {
     private final StudyReadService studyReadService;
     private final ZoneService zoneService;
     private final TagService tagService;
-    private final ModelMapper modelMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Study createNewStudy(Study study, Account account) {
@@ -139,7 +141,7 @@ public class StudyAccountUsacase {
         checkIfManager(accountDto, study);
 
         study.publish();
-
+        this.eventPublisher.publishEvent(new StudyCreatedEvent(study));
     }
 
     @Transactional

@@ -30,5 +30,8 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
 
     @EntityGraph(value = "Study.withAccount", type = EntityGraph.EntityGraphType.LOAD)
     Study findWithAccountByPath(String path);
+
+    @EntityGraph(value = "Study.withAll", type = EntityGraph.EntityGraphType.LOAD)
+    Study findWithAllById(Long id);
 }
 
