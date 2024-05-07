@@ -36,7 +36,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             AccountReadService accountReadService,
-            ModelMapper modelMapper,
             HttpSecurity http
     ) throws Exception {
 
@@ -62,7 +61,7 @@ public class SecurityConfig {
                         logout -> logout.logoutSuccessUrl("/"))
                 .rememberMe(
                         config -> config
-                                .userDetailsService(userDetailsService(accountReadService, modelMapper))
+                                .userDetailsService(userDetailsService(accountReadService))
                                 .tokenRepository(tokenRepository()))
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
@@ -78,8 +77,7 @@ public class SecurityConfig {
     }
     @Bean
     public UserDetailsService userDetailsService(
-            AccountReadService accountReadService,
-            ModelMapper modelMapper
+            AccountReadService accountReadService
     ) {
         return username -> {
             Account account = accountReadService
