@@ -1,29 +1,24 @@
-package com.hobbyboard.domain.notification.entity;
+package com.hobbyboard.domain.notification.dto;
 
 import com.hobbyboard.domain.account.entity.Account;
 import com.hobbyboard.domain.notification.NotificationType;
-import jakarta.persistence.*;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Entity @Getter @Setter
-@EqualsAndHashCode(of = "id")
-@Builder @AllArgsConstructor @NoArgsConstructor
-public class Notification {
-
-    @Id @GeneratedValue
+@Getter @Setter
+@EqualsAndHashCode(of = "id") @Builder
+@AllArgsConstructor @NoArgsConstructor
+public class NotificationDTO {
     private Long id;
     private String title;
     private String link;
     private String message;
     private boolean checked;
-
-    @ManyToOne
     private Account account;
-
     private LocalDateTime createdAt;
-
-    @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
 }

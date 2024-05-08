@@ -76,7 +76,7 @@ public class StudyEventListener {
                 .createdAt(LocalDateTime.now())
                 .message(study.getShortDescription())
                 .account(account)
-                .type(NotificationType.STUDY_CREATED)
+                .notificationType(NotificationType.STUDY_CREATED)
                 .build();
 
         notificationRepository.save(notification);
