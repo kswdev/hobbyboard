@@ -10,6 +10,7 @@ import com.hobbyboard.domain.study.entity.StudyAccount;
 import com.hobbyboard.domain.study.entity.StudyTag;
 import com.hobbyboard.domain.study.entity.StudyZone;
 import com.hobbyboard.domain.study.event.StudyCreatedEvent;
+import com.hobbyboard.domain.study.event.StudyUpdatedEvent;
 import com.hobbyboard.domain.study.service.StudyAccountReadService;
 import com.hobbyboard.domain.study.service.StudyReadService;
 import com.hobbyboard.domain.study.service.StudyWriteService;
@@ -141,7 +142,7 @@ public class StudyAccountUsacase {
         checkIfManager(accountDto, study);
 
         study.publish();
-        this.eventPublisher.publishEvent(new StudyCreatedEvent(study));
+        eventPublisher.publishEvent(new StudyCreatedEvent(study));
     }
 
     @Transactional
@@ -151,6 +152,7 @@ public class StudyAccountUsacase {
         checkIfManager(accountDto, study);
 
         study.close();
+        eventPublisher.publishEvent(new StudyUpdatedEvent(study, "스터디가 종료되었습니다."));
     }
 
     @Transactional
@@ -159,7 +161,11 @@ public class StudyAccountUsacase {
 
         checkIfManager(accountDto, study);
 
-        return study.startRecruit();
+        if (study.startRecruit()) {
+            eventPublisher.publishEvent(new StudyUpdatedEvent(study, "팀원 모집이 시작되었습니다."));
+            return true;
+        } else
+            return false;
     }
 
     @Transactional
@@ -170,6 +176,7 @@ public class StudyAccountUsacase {
 
         study.setRecruiting(false);
         study.setRecruitingUpdatedDateTime(LocalDateTime.now());
+        eventPublisher.publishEvent(new StudyUpdatedEvent(study, "팀원 모집이 종료되었습니다."));
     }
 
     @Transactional

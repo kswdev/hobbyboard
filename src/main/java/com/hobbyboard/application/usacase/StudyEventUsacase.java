@@ -10,8 +10,10 @@ import com.hobbyboard.domain.event.service.EventReadService;
 import com.hobbyboard.domain.event.service.EventWriteService;
 import com.hobbyboard.domain.study.dto.StudyDto;
 import com.hobbyboard.domain.study.entity.Study;
+import com.hobbyboard.domain.study.event.StudyUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +25,11 @@ import java.util.Objects;
 @Component
 public class StudyEventUsacase {
 
-    private final AccountReadService accountReadService;
-    private final EventWriteService eventWriteService;
-    private final EventReadService eventReadService;
     private final ModelMapper modelMapper;
+    private final EventReadService eventReadService;
+    private final EventWriteService eventWriteService;
+    private final AccountReadService accountReadService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Event createEvent(EventForm eventForm, AccountDto accountDto, StudyDto studyDto) {
@@ -41,6 +44,8 @@ public class StudyEventUsacase {
                 .build();
         modelMapper.map(eventForm, event);
 
+        eventPublisher.publishEvent(new StudyUpdatedEvent(study,
+                "'" + event.getTitle() + "' 모임을 만들었습니다."));
         return eventWriteService.save(event);
     }
 

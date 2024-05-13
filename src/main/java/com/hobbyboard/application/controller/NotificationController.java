@@ -45,7 +45,7 @@ public class NotificationController {
 
         model.addAttribute("isNew", true);
 
-        //service.markAsRead(uncheckedNotifications.stream().map((notificationDTO) -> modelMapper.map(notificationDTO, Notification.class)).toList());
+        service.markAsRead(uncheckedNotifications.stream().map((notificationDTO) -> modelMapper.map(notificationDTO, Notification.class)).toList());
         return "notification/list";
     }
 
@@ -74,7 +74,7 @@ public class NotificationController {
 
     @DeleteMapping("/notifications")
     public String deleteNotifications(@CurrentUser AccountDto account) {
-        repository.deleteByAccountAndChecked(modelMapper.map(account, Account.class), true);
+        service.deleteByAccountAndChecked(modelMapper.map(account, Account.class), true);
         return "redirect:/notifications";
     }
 

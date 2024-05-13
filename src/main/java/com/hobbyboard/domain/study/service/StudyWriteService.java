@@ -5,10 +5,12 @@ import com.hobbyboard.domain.study.dto.StudyDescriptionForm;
 import com.hobbyboard.domain.study.entity.Study;
 import com.hobbyboard.domain.study.entity.StudyAccount;
 import com.hobbyboard.domain.study.entity.StudyTag;
+import com.hobbyboard.domain.study.event.StudyUpdatedEvent;
 import com.hobbyboard.domain.study.repository.StudyRepository;
 import com.hobbyboard.domain.study.repository.StudyTagRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class StudyWriteService {
+    private final ApplicationEventPublisher eventPublisher;
     private final StudyTagRepository studyTagRepository;
     private final StudyRepository studyRepository;
     private final ModelMapper modelMapper;
@@ -30,7 +33,7 @@ public class StudyWriteService {
                 .orElseThrow(IllegalArgumentException::new);
 
         modelMapper.map(studyForm, study);
-
+        eventPublisher.publishEvent(new StudyUpdatedEvent(study, "스터디 소개를 수정했습니다."));
         return study;
     }
 

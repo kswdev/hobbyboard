@@ -50,12 +50,12 @@ public class SettingsController {
     private final NicknameFormValidator nicknameFormValidator;
     private final AccountWriteService accountWriteService;
     private final AccountReadService accountReadService;
-    private final ZoneService zoneService;
     private final AccountZoneUsacase accountZoneUsacase;
     private final AccountTagUsacase accountTagUsacase;
-    private final TagService tagService;
-    private final ModelMapper modelMapper;
     private final ObjectMapper objectMapper;
+    private final ZoneService zoneService;
+    private final ModelMapper modelMapper;
+    private final TagService tagService;
 
     static final String ROOT = "/";
     static final String SETTINGS = "settings";

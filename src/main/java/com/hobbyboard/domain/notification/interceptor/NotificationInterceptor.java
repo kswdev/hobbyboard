@@ -23,7 +23,7 @@ public class NotificationInterceptor implements HandlerInterceptor {
     private final NotificationRepository notificationRepository;
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (modelAndView != null && !isRedirectView(modelAndView) && authentication != null && authentication.getPrincipal() instanceof UserAccount) {
             AccountDto account = ((UserAccount) authentication.getPrincipal()).getAccount();

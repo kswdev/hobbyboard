@@ -29,4 +29,8 @@ public class NotificationService {
     public List<Notification> findByAccountAndCheckedOrderByCreatedAtDesc(Account account, boolean checked) {
         return notificationRepository.findByAccountAndCheckedOrderByCreatedAtDesc(account, checked);
     }
+
+    public void deleteByAccountAndChecked(Account account, boolean checked) {
+        notificationRepository.deleteByAccountAndChecked(account, checked);
+    }
 }

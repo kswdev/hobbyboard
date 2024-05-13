@@ -7,11 +7,14 @@ import com.hobbyboard.domain.account.predicate.AccountPredicates;
 import com.hobbyboard.domain.account.repository.AccountRepository;
 import com.hobbyboard.domain.account.repository.AccountTagRepository;
 import com.hobbyboard.domain.account.repository.AccountZoneRepository;
+import com.hobbyboard.domain.event.entity.Enrollment;
+import com.hobbyboard.domain.event.entity.Event;
 import com.hobbyboard.domain.mail.ConsoleMailSender;
 import com.hobbyboard.domain.notification.NotificationType;
 import com.hobbyboard.domain.notification.entity.Notification;
 import com.hobbyboard.domain.notification.repository.NotificationRepository;
 import com.hobbyboard.domain.study.entity.Study;
+import com.hobbyboard.domain.study.entity.StudyAccount;
 import com.hobbyboard.domain.study.entity.StudyTag;
 import com.hobbyboard.domain.study.entity.StudyZone;
 import com.hobbyboard.domain.study.repository.StudyRepository;
@@ -38,9 +41,34 @@ public class StudyEventListener {
 
     private final StudyRepository studyRepository;
     private final AccountRepository accountRepository;
-    private final NotificationRepository notificationRepository;
     private final AccountTagRepository accountTagRepository;
+    private final NotificationRepository notificationRepository;
     private final AccountZoneRepository accountZoneRepository;
+
+    @EventListener
+    public void handleEnrollmentEvent(EnrollmentEvent enrollmentEvent) {
+        Enrollment enrollment = enrollmentEvent.getEnrollment();
+        Account account = enrollment.getAccount();
+        Event event = enrollment.getEvent();
+        Study study = event.getStudy();
+
+        createNotification(study, account, enrollmentEvent.getMessage(), NotificationType.EVENT_ENROLLMENT);
+    }
+
+    @EventListener
+    public void handleStudyUpdatedEvent(StudyUpdatedEvent studyUpdatedEvent) {
+        Study study = studyRepository.findWithAccountByPath(studyUpdatedEvent.getStudy().getPath());
+
+        study.getStudyAccounts().stream()
+                .map(StudyAccount::getAccount)
+                .forEach(account -> {
+                    if (account.isStudyUpdatedByEmail())
+                        sendStudyCreatedEmail(study, account, studyUpdatedEvent.getMessage());
+
+                    if (account.isStudyUpdatedByWeb())
+                        createNotification(study, account, studyUpdatedEvent.getMessage(), NotificationType.STUDY_UPDATED);
+                });
+    }
 
     @EventListener
     public void handleStudyCreatedEvent(StudyCreatedEvent studyCreatedEvent) {
@@ -60,31 +88,30 @@ public class StudyEventListener {
         Iterable<Account> accounts = accountRepository.findAll(AccountPredicates.findByTagsAndZones(accountTags, accountZones));
         accounts.forEach(account -> {
             if (account.isStudyCreatedByEmail())
-                sendStudyCreatedEmail(study, account);
-
+                sendStudyCreatedEmail(study, account, "스터디가 생성되었습니다.");
 
             if (account.isStudyCreatedByWeb())
-                saveStudyCreatedNotification(study, account);
+                createNotification(study, account, study.getShortDescription(), NotificationType.STUDY_CREATED);
         });
     }
 
-    private void saveStudyCreatedNotification(Study study, Account account) {
+    private void createNotification(Study study, Account account, String message, NotificationType notificationType) {
         Notification notification = Notification.builder()
                 .title(study.getTitle())
                 .link("/study/" + study.getEncodePath())
                 .checked(false)
                 .createdAt(LocalDateTime.now())
-                .message(study.getShortDescription())
+                .message(message)
                 .account(account)
-                .notificationType(NotificationType.STUDY_CREATED)
+                .notificationType(notificationType)
                 .build();
 
         notificationRepository.save(notification);
     }
 
-    private static void sendStudyCreatedEmail(Study study, Account account) {
+    private static void sendStudyCreatedEmail (Study study, Account account, String message) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setSubject(study.getTitle() + "스터디가 생겼습니다.");
+        mailMessage.setSubject(study.getTitle() + message);
         mailMessage.setTo(account.getEmail());
         mailMessage.setText("template");
 
