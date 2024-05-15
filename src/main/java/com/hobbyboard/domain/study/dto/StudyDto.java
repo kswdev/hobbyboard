@@ -43,6 +43,7 @@ public class StudyDto implements Serializable {
     private boolean published;
     private boolean closed;
     private boolean useBanner;
+    private int memberCount;
 
     public boolean isRemovable() {
         return !published;
@@ -77,6 +78,7 @@ public class StudyDto implements Serializable {
                 .published(study.isPublished())
                 .closed(study.isClosed())
                 .useBanner(study.isUseBanner())
+                .memberCount(study.getMembers().size())
                 .build();
     }
 
@@ -95,6 +97,7 @@ public class StudyDto implements Serializable {
                 .published(study.isPublished())
                 .closed(study.isClosed())
                 .useBanner(study.isUseBanner())
+                .memberCount(study.getMembers().size())
                 .build();
     }
 

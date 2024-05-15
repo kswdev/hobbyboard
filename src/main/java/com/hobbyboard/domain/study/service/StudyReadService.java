@@ -1,5 +1,6 @@
 package com.hobbyboard.domain.study.service;
 
+import com.hobbyboard.domain.study.dto.StudyDto;
 import com.hobbyboard.domain.study.entity.Study;
 import com.hobbyboard.domain.study.entity.StudyZone;
 import com.hobbyboard.domain.study.repository.StudyRepository;
@@ -7,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -42,5 +45,11 @@ public class StudyReadService {
     public boolean isValidPath(String newPath) {
         Study byPath = findByPath(newPath);
         return !ObjectUtils.isEmpty(byPath);
+    }
+
+    public List<StudyDto> findByKeyword(String keyword) {
+        return studyRepository.findByKeyword(keyword).stream()
+                .map(StudyDto::fromWithAll)
+                .toList();
     }
 }
